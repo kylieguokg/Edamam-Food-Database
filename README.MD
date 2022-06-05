@@ -1,7 +1,7 @@
-  #Edanam Food Database Ingredient Search
-  A JavaFX GUI application that allows users to view nutritional data for foods (sourced from Edamam’s Food Database API), as well as save that data to an  embedded database, or send it to PasteBin or their Reddit accounts
+##Edanam Food Database Ingredient Search##
+A JavaFX GUI application that allows users to view nutritional data for foods (sourced from Edamam’s Food Database API), as well as save that data to an  embedded database, or send it to PasteBin or their Reddit accounts
   
-  - Please run using gradle run --args="online online" to run with an online input API and online output API
+- Please run using gradle run --args="online online" to run with an online input API and online output API
   
   
   **Input API: Edamam**
