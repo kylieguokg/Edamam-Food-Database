@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SearchView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">SearchView.java</span></div><h1>SearchView.java</h1><pre class="source lang-java linenums">package project.view;
+
+
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import project.model.Food;
+import project.model.Observer;
+import project.presenter.SearchPresenter;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.*;
+import javafx.util.Callback;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/***
+ *   Displays the search interface for searching for a food in the database
+ */
+public class SearchView implements View {
+
+    private MainView mainView;
+    private BorderPane borderPane;
+    private ScrollPane scrollPane;
+    private Scene scene;
+
+    /***
+     * Stores all the main nodes
+     */
+    private VBox mainBox;
+
+    /***
+     * Displays the search results
+     */
+    private TableView&lt;Food&gt; searchTable;
+
+    /***
+     * Stores the navigation bar
+     */
+    private HBox topBox;
+
+    private TextField searchTF;
+
+    /***
+     * Shows a message displaying if an operation was successful
+     */
+    private Label resultLBL;
+    private Label searchLBL;
+    private Label titleLBL;
+
+    private Button confirmBTN;
+    private Button searchBTN;
+
+    /***
+     * Responsible for mutating the search view and the search state
+     */
+    private SearchPresenter searchPresenter;
+
+    private String textColour;
+
+<span class="nc" id="L71">    private final ExecutorService pool = Executors.newFixedThreadPool(2, runnable -&gt; {</span>
+<span class="nc" id="L72">        Thread thread = new Thread(runnable);</span>
+<span class="nc" id="L73">        thread.setDaemon(true);</span>
+<span class="nc" id="L74">        return thread ;</span>
+    });
+
+<span class="nc" id="L77">    public SearchView(MainView mainView){</span>
+<span class="nc" id="L78">        this.mainView = mainView;</span>
+<span class="nc" id="L79">        this.borderPane = new BorderPane();</span>
+
+<span class="nc" id="L81">        this.scene = new Scene(borderPane, 1400, 800);</span>
+<span class="nc" id="L82">        scene.getStylesheets().add(mainView.getStyleSheet());</span>
+
+<span class="nc" id="L84">        mainBox = new VBox(30);</span>
+<span class="nc" id="L85">        mainBox.getStyleClass().add(&quot;vbox&quot;);</span>
+<span class="nc" id="L86">        mainBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L88">        scrollPane = new ScrollPane();</span>
+<span class="nc" id="L89">        scrollPane.setContent(mainBox);</span>
+<span class="nc" id="L90">        scrollPane.setPadding(new Insets(0, 50, 50, 50));</span>
+<span class="nc" id="L91">        borderPane.setCenter(scrollPane);</span>
+<span class="nc" id="L92">        scrollPane.fitToWidthProperty().set(true);</span>
+
+
+
+<span class="nc" id="L96">        titleLBL = new Label(&quot;Food and Grocery Database Search&quot;);</span>
+<span class="nc" id="L97">        titleLBL.setId(&quot;title&quot;);</span>
+<span class="nc" id="L98">        mainBox.getChildren().add(titleLBL);</span>
+
+
+<span class="nc" id="L101">        resultLBL = new Label(&quot;&quot;);</span>
+
+<span class="nc" id="L103">        setUpTopBox();</span>
+
+<span class="nc" id="L105">    }</span>
+
+
+    @Override
+    public Scene getScene(){
+<span class="nc" id="L110">        return scene;</span>
+    }
+
+
+    /***
+     * Sets up all the main elements of view
+     * @param searchPresenter
+     */
+    public void setUp(SearchPresenter searchPresenter){
+
+<span class="nc" id="L120">        this.searchPresenter = searchPresenter;</span>
+
+<span class="nc" id="L122">        setUpSearch();</span>
+<span class="nc" id="L123">        setUpSearchResults();</span>
+<span class="nc" id="L124">        setUpConfirmBTN();</span>
+
+<span class="nc" id="L126">    }</span>
+
+
+
+    /***
+     * Set up confirm button (selects a food)
+     */
+    public void setUpConfirmBTN(){
+
+<span class="nc" id="L135">        SelectionModel selectionModel = searchTable.getSelectionModel();</span>
+
+<span class="nc" id="L137">        confirmBTN = new Button(&quot;Confirm&quot;);</span>
+<span class="nc" id="L138">        confirmBTN.setId(&quot;borderBTN&quot;);</span>
+
+
+<span class="nc" id="L141">        confirmBTN.setOnAction((ActionEvent e) -&gt; {</span>
+
+<span class="nc" id="L143">            Object obj  = selectionModel.getSelectedItem();</span>
+
+<span class="nc" id="L145">            searchPresenter.selectedFood(obj, searchTF.getText());</span>
+
+<span class="nc" id="L147">        });</span>
+
+<span class="nc" id="L149">        mainBox.getChildren().addAll(confirmBTN, resultLBL);</span>
+
+
+<span class="nc" id="L152">    }</span>
+
+    /***
+     * Set up the search inputs
+     */
+    public void setUpSearch(){
+
+<span class="nc" id="L159">        searchLBL = new Label(&quot;Enter an ingredient: &quot;);</span>
+
+<span class="nc" id="L161">        HBox searchBox = new HBox(20);</span>
+<span class="nc" id="L162">        searchTF = new TextField();</span>
+<span class="nc" id="L163">        searchTF.setId(&quot;searchTF&quot;);</span>
+<span class="nc" id="L164">        searchBTN = new Button(&quot;Search&quot;);</span>
+<span class="nc" id="L165">        searchBTN.setId(&quot;borderBTN&quot;);</span>
+
+<span class="nc" id="L167">        searchBox.getChildren().addAll(searchTF, searchBTN);</span>
+<span class="nc" id="L168">        searchBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L170">        searchBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L171">            removeMSG();</span>
+<span class="nc" id="L172">            searchPresenter.search(searchTF.getText());</span>
+<span class="nc" id="L173">        });</span>
+
+<span class="nc" id="L175">        searchTF.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L176">            removeMSG();</span>
+<span class="nc" id="L177">            searchPresenter.search(searchTF.getText());</span>
+<span class="nc" id="L178">        });</span>
+
+<span class="nc" id="L180">        mainBox.getChildren().addAll(searchLBL, searchBox);</span>
+
+<span class="nc" id="L182">    }</span>
+
+    /***
+     * Displays error msg in red
+     * @param msg to display
+     */
+    public void displayErrorMSG(String msg){
+<span class="nc" id="L189">        resultLBL.setId(&quot;failure&quot;);</span>
+<span class="nc" id="L190">        resultLBL.setText(msg);</span>
+<span class="nc" id="L191">    }</span>
+
+    /***
+     * Removes msg from scrreen
+     */
+    public void removeMSG(){
+<span class="nc" id="L197">        resultLBL.setText(&quot;&quot;);</span>
+<span class="nc" id="L198">        resultLBL.setId(&quot;gone&quot;);</span>
+<span class="nc" id="L199">    }</span>
+
+    /***
+     * Clears table of data
+     */
+    public void clearTable(){
+<span class="nc" id="L205">        searchTable.getItems().clear();</span>
+<span class="nc" id="L206">    }</span>
+
+    /***
+     * Inserts the search results in the table
+     */
+    public void showSearchResults() {
+
+<span class="nc" id="L213">        searchLBL.setText(&quot;Select an ingredient from the table below&quot;);</span>
+
+        // first clear the data
+<span class="nc" id="L216">        searchTable.getItems().clear();</span>
+
+<span class="nc" id="L218">        List&lt;Food&gt; results = searchPresenter.getSearchResults();</span>
+
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        for (Food food : results) {</span>
+<span class="nc" id="L221">            searchTable.getItems().add(food);</span>
+<span class="nc" id="L222">        }</span>
+
+
+<span class="nc" id="L225">    }</span>
+
+    /***
+     * Sets up the search results table
+     */
+    public void setUpSearchResults(){
+
+<span class="nc" id="L232">        searchTable = new TableView&lt;Food&gt;();</span>
+<span class="nc" id="L233">        mainBox.getChildren().add(searchTable);</span>
+
+<span class="nc" id="L235">        searchTable.setPlaceholder(new Label(&quot;No results&quot;));</span>
+<span class="nc" id="L236">        searchTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);</span>
+
+<span class="nc" id="L238">        TableColumn&lt;Food, String&gt; col1 = new TableColumn&lt;&gt;(&quot;Food ID&quot;);</span>
+<span class="nc" id="L239">        searchTable.getColumns().add(col1);</span>
+<span class="nc" id="L240">        col1.setMaxWidth(7000);</span>
+<span class="nc" id="L241">        col1.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L242">        col1.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;foodId&quot;));</span>
+
+<span class="nc" id="L244">        TableColumn&lt;Food, String&gt; col2 = new TableColumn&lt;&gt;(&quot;Label&quot;);</span>
+<span class="nc" id="L245">        searchTable.getColumns().add(col2);</span>
+<span class="nc" id="L246">        col2.setMaxWidth(9000);</span>
+<span class="nc" id="L247">        col2.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L248">        col2.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;label&quot;));</span>
+
+<span class="nc" id="L250">        TableColumn&lt;Food, String&gt; col3 = new TableColumn&lt;&gt;(&quot;Energy&quot;);</span>
+<span class="nc" id="L251">        searchTable.getColumns().add(col3);</span>
+<span class="nc" id="L252">        col3.setMaxWidth(2000);</span>
+<span class="nc" id="L253">        col3.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L254">        col3.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L255">        col3.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L258">                Food food = f.getValue();</span>
+<span class="nc" id="L259">                return new SimpleStringProperty(searchPresenter.getEnergyFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L263">        TableColumn&lt;Food, String&gt; col4= new TableColumn&lt;&gt;(&quot;Protein&quot;);</span>
+<span class="nc" id="L264">        searchTable.getColumns().add(col4);</span>
+<span class="nc" id="L265">        col4.setMaxWidth(2000);</span>
+<span class="nc" id="L266">        col4.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L267">        col4.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L268">        col4.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L271">                Food food = f.getValue();</span>
+<span class="nc" id="L272">                return new SimpleStringProperty(searchPresenter.getProteinFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L276">        TableColumn&lt;Food, String&gt; col5 = new TableColumn&lt;&gt;(&quot;Fat&quot;);</span>
+<span class="nc" id="L277">        searchTable.getColumns().add(col5);</span>
+<span class="nc" id="L278">        col5.setMaxWidth(2000);</span>
+<span class="nc" id="L279">        col5.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L280">        col5.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L281">        col5.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L284">                Food food = f.getValue();</span>
+<span class="nc" id="L285">                return new SimpleStringProperty(searchPresenter.getFatFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L289">        TableColumn&lt;Food, String&gt; col6 = new TableColumn&lt;&gt;(&quot;Carbohydrate&quot;);</span>
+<span class="nc" id="L290">        searchTable.getColumns().add(col6);</span>
+<span class="nc" id="L291">        col6.setMaxWidth(3000);</span>
+<span class="nc" id="L292">        col6.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L293">        col6.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L294">        col6.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L297">                Food food = f.getValue();</span>
+<span class="nc" id="L298">                return new SimpleStringProperty(searchPresenter.getCarbohydrateFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L302">        TableColumn&lt;Food, String&gt; col7= new TableColumn&lt;&gt;(&quot;Fibre&quot;);</span>
+<span class="nc" id="L303">        searchTable.getColumns().add(col7);</span>
+<span class="nc" id="L304">        col7.setMaxWidth(2500);</span>
+<span class="nc" id="L305">        col7.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L306">        col7.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L307">        col7.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L310">                Food food = f.getValue();</span>
+<span class="nc" id="L311">                return new SimpleStringProperty(searchPresenter.getFibreFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L315">        TableColumn&lt;Food, String&gt; col8 = new TableColumn&lt;&gt;(&quot;Category\nLabel&quot;);</span>
+<span class="nc" id="L316">        searchTable.getColumns().add(col8);</span>
+<span class="nc" id="L317">        col8.setMaxWidth(2500);</span>
+<span class="nc" id="L318">        col8.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L319">        col8.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;categoryLabel&quot;));</span>
+
+<span class="nc" id="L321">    }</span>
+
+    @Override
+    public void setUpTopBox(){
+<span class="nc" id="L325">        borderPane.setTop(mainView.getTopSP());</span>
+<span class="nc" id="L326">    }</span>
+
+
+    @Override
+    public void openSettings(VBox settingsMenu){
+<span class="nc" id="L331">        borderPane.setRight(settingsMenu);</span>
+<span class="nc" id="L332">    }</span>
+
+
+    @Override
+    public void closeSettings(VBox settingsMenu){
+<span class="nc" id="L337">        borderPane.setRight(null);</span>
+<span class="nc" id="L338">    }</span>
+
+
+    @Override
+    public void setColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                           String tableColour, String quantityColour,
+                           String maxQuantityColour){
+
+<span class="nc" id="L346">        this.textColour = textColour;</span>
+        // table colour
+<span class="nc" id="L348">        searchTable.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L349">        searchTable.lookup(&quot;.column-header-background &quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L350">        searchTable.lookup(&quot;.column-header-background .filler&quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+
+<span class="nc" id="L352">        searchTable.lookupAll(&quot;.table-view .column-header&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L354">            node.setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L355">        });</span>
+
+<span class="nc" id="L357">        searchTable.lookupAll(&quot;.column-border&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L359">            node.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L360">        });</span>
+
+<span class="nc" id="L362">        searchTable.lookupAll(&quot;.label&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L364">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L365">        });</span>
+
+<span class="nc" id="L367">        searchTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L369">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L370">        });</span>
+
+<span class="nc" id="L372">        searchTable.lookupAll(&quot;.table-column&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L374">            node.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L375">        });</span>
+
+        // text colour
+<span class="nc" id="L378">        titleLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L379">        searchLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+
+        // button colour
+<span class="nc" id="L383">        confirmBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+<span class="nc" id="L384">        searchBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+
+
+        // background colour
+<span class="nc" id="L388">        scene.setFill(Paint.valueOf(backgroundColour));</span>
+
+<span class="nc" id="L390">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

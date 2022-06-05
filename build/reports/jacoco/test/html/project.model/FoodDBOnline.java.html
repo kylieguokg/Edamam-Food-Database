@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodDBOnline.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">FoodDBOnline.java</span></div><h1>FoodDBOnline.java</h1><pre class="source lang-java linenums">package project.model;
+
+import com.google.gson.JsonElement;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+
+
+/***
+ * Manages retrieval and storing of data that requires the internet and database
+ */
+public class FoodDBOnline implements FoodDB{
+
+    /***
+     * Manages retrieving data from Edanam Food Database
+     */
+    private FoodDBHTTP foodDBHTTP;
+
+    /***
+     * Helper class to convert Json results from
+     * HTTP and the database into POJOs
+     */
+    private FoodDBJsonParser foodDBJsonParser;
+
+    /***
+     * Manages the retrieval and storing of data in SQLite database
+     */
+    private FoodDBOnlineCache foodDBOnlineCache;
+
+    /***
+     * Cached version of currently selected food
+     */
+    private Food cachedOfSelected;
+
+    /***
+     * Currently selected food
+     */
+    private Food selectedFood;
+
+    /***
+     * Currently logged in user
+     */
+    private User currentUser;
+
+<span class="fc" id="L47">    public FoodDBOnline(FoodDBHTTP foodDBHTTP, FoodDBJsonParser foodDBJsonParser, FoodDBOnlineCache foodDBOnlineCache){</span>
+<span class="fc" id="L48">        this.foodDBHTTP = foodDBHTTP;</span>
+<span class="fc" id="L49">        this.foodDBJsonParser = foodDBJsonParser;</span>
+<span class="fc" id="L50">        this.foodDBOnlineCache = foodDBOnlineCache;</span>
+
+<span class="fc" id="L52">        foodDBOnlineCache.createDatabaseWithSchema();</span>
+<span class="fc" id="L53">    }</span>
+
+    @Override
+    public String enterAnIngredient(String ingredient){
+
+<span class="fc" id="L58">        ingredient = ingredient.replace(&quot; &quot;, &quot;%20&quot;);</span>
+
+        // not accepted characters
+<span class="fc" id="L61">        ingredient = ingredient.replace(&quot;[&quot;, &quot;&quot;);</span>
+<span class="fc" id="L62">        ingredient = ingredient.replace(&quot;]&quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L64">        String out = foodDBHTTP.enterAnIngredient(ingredient);</span>
+
+<span class="fc" id="L66">        String result = foodDBJsonParser.enterAnIngredient(out);</span>
+
+<span class="fc" id="L68">        return result;</span>
+
+    }
+
+    @Override
+    public String selectAFood(int quantity, Measure measure, Food food, boolean cachedVersion){
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (cachedVersion){</span>
+<span class="fc" id="L76">            this.selectedFood = cachedOfSelected;</span>
+<span class="fc" id="L77">            return &quot;ok&quot;;</span>
+        } else {
+
+<span class="fc" id="L80">            this.selectedFood = food;</span>
+<span class="fc" id="L81">            this.selectedFood.setSelectedMeasure(measure);</span>
+
+<span class="fc" id="L83">            String out = foodDBHTTP.selectAFood(quantity, measure, selectedFood);</span>
+
+            // Converts HTTP results into POJOs and returns a msg regarding the success of call
+<span class="fc" id="L86">            String result = foodDBJsonParser.selectAFood(out, selectedFood);</span>
+
+            // Save the food to cache
+<span class="fc" id="L89">            foodDBOnlineCache.cacheSelectedFood(selectedFood, quantity);</span>
+
+<span class="fc" id="L91">            return result;</span>
+        }
+
+    }
+
+    @Override
+    public boolean checkIfCachedVersion(Measure measure, Food food, int quantity){
+
+<span class="fc" id="L99">        List&lt;String&gt; out = foodDBOnlineCache.getCachedFood(food.getFoodId(), measure.getUri(), quantity);</span>
+
+        // Converts HTTP results into a Food POJO
+<span class="fc" id="L102">        Food cachedVersion = foodDBJsonParser.getFood(out);</span>
+
+        // if there was a cached version, store it
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (cachedVersion != null){</span>
+<span class="fc" id="L106">            cachedOfSelected = cachedVersion;</span>
+<span class="fc" id="L107">            return true;</span>
+        }
+
+<span class="fc" id="L110">        return false;</span>
+
+    }
+
+
+    @Override
+    public List&lt;Food&gt; getSearchResults(){
+<span class="nc" id="L117">        return foodDBJsonParser.getSearchResults();</span>
+    }
+
+    @Override
+    public Food getSelectedFood() {
+<span class="fc" id="L122">        return selectedFood;</span>
+    }
+
+    @Override
+    public void setSelectedFood(Food food) {
+<span class="nc" id="L127">        this.selectedFood = food;</span>
+<span class="nc" id="L128">    }</span>
+
+
+    @Override
+    public boolean login(String username, String password){
+
+        // Check if the database has this login
+        // login with hashed password
+<span class="fc" id="L136">        List&lt;String&gt; out = foodDBOnlineCache.login(username, hashPassword(password));</span>
+
+        // Converts results to a POJO
+<span class="fc" id="L139">        currentUser = foodDBJsonParser.getUser(out);</span>
+
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if(currentUser == null){</span>
+<span class="fc" id="L142">            throw new IllegalArgumentException(&quot;ERROR: Invalid login&quot;);</span>
+        } else {
+<span class="fc" id="L144">            return true;</span>
+        }
+
+
+    }
+
+    /***
+     * Hashes password in SHA-1 format
+     * @param  password password to hash
+     * @return hashedPassword
+     * Citation: GeeksforGeeks. (2019, January 3). SHA-1 Hash.
+     * https://www.geeksforgeeks.org/sha-1-hash-in-java/
+     */
+    public String hashPassword(String password){
+
+        try {
+            // getInstance() method is called with algorithm SHA-1
+<span class="fc" id="L161">            MessageDigest md = MessageDigest.getInstance(&quot;SHA-1&quot;);</span>
+
+            // digest() method is called
+            // to calculate message digest of the input string
+            // returned as array of byte
+<span class="fc" id="L166">            byte[] messageDigest = md.digest(password.getBytes());</span>
+
+            // Convert byte array into signum representation
+<span class="fc" id="L169">            BigInteger no = new BigInteger(1, messageDigest);</span>
+
+            // Convert message digest into hex value
+<span class="fc" id="L172">            String hashtext = no.toString(16);</span>
+
+            // Add preceding 0s to make it 32 bit
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">            while (hashtext.length() &lt; 32) {</span>
+<span class="nc" id="L176">                hashtext = &quot;0&quot; + hashtext;</span>
+            }
+
+            // return the HashText
+<span class="fc" id="L180">            return hashtext;</span>
+        }
+
+        // For specifying wrong message digest algorithms
+<span class="nc" id="L184">        catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L185">            throw new RuntimeException(e);</span>
+        }
+
+    }
+
+    @Override
+    public User getUser(){
+<span class="nc" id="L192">        return currentUser;</span>
+    }
+
+    @Override
+    public boolean createUser(String username, String password) {
+
+        // if username doesn't already exist, can create user
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        if (!foodDBOnlineCache.checkUsernameExists(username)){</span>
+
+<span class="fc" id="L201">            foodDBOnlineCache.createUser(username, hashPassword(password), new User(username));</span>
+<span class="fc" id="L202">            return true;</span>
+
+        } else {
+<span class="fc" id="L205">            throw new IllegalArgumentException( &quot;ERROR: Account with username already exists&quot;);</span>
+
+        }
+
+    }
+
+    @Override
+    public void saveColours(){
+<span class="nc" id="L213">        foodDBOnlineCache.updatePersonalisation(currentUser);</span>
+<span class="nc" id="L214">    }</span>
+
+    @Override
+    public void saveTotalNutrients(){
+<span class="nc" id="L218">        foodDBOnlineCache.updatePersonalisation(currentUser);</span>
+<span class="nc" id="L219">    }</span>
+
+
+    @Override
+    public String saveFood(Food food){
+<span class="nc" id="L224">        return foodDBOnlineCache.saveFood(currentUser.getUsername(), food);</span>
+    }
+
+    @Override
+    public List&lt;Food&gt; getSavedFoods(){
+
+        // retrieve list of saved foods for this user from the database
+<span class="nc" id="L231">        List&lt;String&gt; out = foodDBOnlineCache.getSavedFoods(currentUser.getUsername());</span>
+
+        // convert JSon results into a list of Food POJOs
+<span class="nc" id="L234">        List&lt;Food&gt; savedFoods = foodDBJsonParser.getSavedFoods(out);</span>
+
+<span class="nc" id="L236">        return savedFoods;</span>
+    }
+
+    @Override
+    public void clearCache(){
+<span class="nc" id="L241">        foodDBOnlineCache.clearCache();</span>
+<span class="nc" id="L242">    }</span>
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

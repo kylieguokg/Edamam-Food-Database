@@ -1,0 +1,177 @@
+@font-face {
+    font-family: 'Comfortaa';
+    src: url('Comfortaa-VariableFont_wght.ttf');
+}
+
+@font-face {
+    font-family: 'Comfortaa Bold';
+    src: url('Comfortaa-Bold.ttf');
+}
+
+.root {
+    -fx-font-size: 14 px;
+    -fx-font-family: 'Comfortaa';
+    -fx-background-color: BLACK;
+
+}
+
+.button {
+    -fx-background-color: TRANSPARENT;
+    -fx-text-fill: WHITE;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-border-color: WHITE;
+    -fx-label-padding: 5px;
+    -fx-min-width: 100;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+
+.label {
+    -fx-alignment: CENTER;
+    -fx-max-width: 500;
+    -fx-text-fill: WHITE;
+
+}
+
+
+.text-field {
+    -fx-alignment: CENTER;
+    -fx-max-width: 180;
+}
+
+.text-area{
+    -fx-text-fill: WHITE;
+    -fx-background-color: BLACK;
+    -fx-border-color: TRANSPARENT;
+    -fx-max-width: 400;
+    -fx-max-height: 60;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.text-area .content{
+    -fx-background-color: BLACK;
+}
+
+.text-area .text{
+    -fx-text-alignment: CENTER;
+}
+
+
+#title {
+    -fx-font-size: 20px;
+
+}
+
+.vbox {
+
+    -fx-alignment: CENTER;
+}
+
+
+
+.imageView {
+    -fx-fit-to-width: 20.0;
+    -fx-fit-to-height: 20.0;
+}
+
+#FP{
+    -fx-border-color: TRANSPARENT;
+    -fx-alignment: baseline-left;
+}
+
+.table-column{
+    -fx-alignment: CENTER;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-radius: 7px 7px 0px 0px;
+}
+
+.table-view .column-header,
+.table-view .column-header-background .filler,
+.table-view .column-header-background{
+    -fx-background-color: #BA4A00;
+    -fx-background-radius: 7px 7px 0px 0px;
+
+}
+
+.table-row-cell{
+    -fx-background-color: transparent;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+
+
+.table-view .table-cell{
+    -fx-border-color: transparent;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+
+}
+
+.table-row-cell:selected {
+    -fx-background-color:#DC7633;
+    -fx-text-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 2px;
+}
+
+.table-view *.scroll-bar:horizontal *.increment-button,
+.table-view *.scroll-bar:horizontal *.decrement-button {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+#failure {
+    -fx-background-color: #DC4E33;
+    -fx-padding: 10;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 2px;
+    -fx-alignment: CENTER;
+    -fx-max-width: 800;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+#success {
+    -fx-background-color: #56BC4C;
+    -fx-padding: 10;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 2px;
+    -fx-alignment: CENTER;
+    -fx-max-width: 800;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+#gone {
+    -visibility: hidden;
+}
+.combo-box{
+    -fx-min-width: 200;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.scroll-pane{
+    -fx-background-color: transparent;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.grid-pane{
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}

@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NutrientsView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">NutrientsView.java</span></div><h1>NutrientsView.java</h1><pre class="source lang-java linenums">package project.view;
+
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.HPos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import project.model.Food;
+import project.model.Measure;
+import project.model.Nutrient;
+import project.presenter.NutrientsPresenter;
+
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.util.Callback;
+import project.view.NutrientsView;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.beans.property.SimpleStringProperty;
+
+/***
+ *   Displays the nutrition information for a food
+ */
+public class NutrientsView implements View {
+
+
+    /***
+     * Responsible for mutating the nutrients view and the nutrients state
+     */
+    private NutrientsPresenter nutrientsPresenter;
+
+    private MainView mainView;
+    private View backView;
+    private BorderPane borderPane;
+    private ScrollPane scrollPane;
+    private Scene scene;
+
+    /***
+     * Stores all the main nodes
+     */
+    private VBox mainBox;
+
+    /***
+     * Displays the nutrition information for the food
+     */
+    private TreeTableView&lt;Nutrient&gt; nutrientsTable;
+
+    /***
+     * Displays any error messages or results
+     */
+    private Label resultLBL;
+
+    private HBox measureBox;
+    private ComboBox&lt;String&gt; selectMeasure;
+    private Map&lt;String, Measure&gt; measures;
+    private TextField quantityTF;
+
+
+    private Label titleLBL;
+
+    /***
+     * Additional nutritional information
+     */
+    private VBox summaryBox;
+
+
+    /***
+     * Button for seeing nutritional information for a food
+     */
+    private Button nutritionBTN;
+
+    /***
+     * Button for saving the food
+     */
+    private Button saveFoodBTN;
+
+    private Food selectedFood;
+    private Measure selectedMeasure;
+    private Integer selectedQuantity;
+
+<span class="nc" id="L96">    private Label cautionLBL = new Label(&quot;Cautions: &quot;);</span>
+<span class="nc" id="L97">    private Label healthLabelsLBL = new Label(&quot;Health Labels: &quot;);</span>
+<span class="nc" id="L98">    private Label dietLabelsLBL = new Label(&quot;Diet Labels: &quot;);</span>
+<span class="nc" id="L99">    private Label totalWeightNameLBL = new Label(&quot;Total Weight: &quot;);</span>
+<span class="nc" id="L100">    private Label totalWeightLBL = new Label();</span>
+<span class="nc" id="L101">    private Label caloriesNameLBL = new Label(&quot;Calories: &quot;);</span>
+<span class="nc" id="L102">    private Label caloriesLBL = new Label();</span>
+    private Label measureLBL;
+    private Label quantityLBL;
+
+    private FlowPane dietFP;
+    private FlowPane cautionFP;
+    private FlowPane healthFP;
+
+
+    public NutrientsView(MainView mainView
+<span class="nc" id="L112">    ){</span>
+<span class="nc" id="L113">        this.mainView = mainView;</span>
+
+<span class="nc" id="L115">        this.borderPane = new BorderPane();</span>
+<span class="nc" id="L116">        this.scene = new Scene(borderPane, 1400, 800);</span>
+<span class="nc" id="L117">        scene.getStylesheets().add(mainView.getStyleSheet());</span>
+<span class="nc" id="L118">    }</span>
+
+    @Override
+    public Scene getScene(){
+<span class="nc" id="L122">        return scene;</span>
+    }
+
+    /***
+     * Sets up all the main elements of view
+     * @param nutrrientsPresenter
+     */
+    public void setUp(NutrientsPresenter nutrrientsPresenter){
+
+<span class="nc" id="L131">        this.nutrientsPresenter = nutrrientsPresenter;</span>
+
+<span class="nc" id="L133">        mainBox = new VBox(30);</span>
+<span class="nc" id="L134">        mainBox.getStyleClass().add(&quot;vbox&quot;);</span>
+<span class="nc" id="L135">        mainBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L137">        scrollPane = new ScrollPane();</span>
+<span class="nc" id="L138">        scrollPane.setContent(mainBox);</span>
+<span class="nc" id="L139">        scrollPane.setPadding(new Insets(0, 50, 50, 50));</span>
+<span class="nc" id="L140">        scrollPane.fitToWidthProperty().set(true);</span>
+<span class="nc" id="L141">        borderPane.setCenter(scrollPane);</span>
+
+<span class="nc" id="L143">        titleLBL = new Label(&quot;Nutrition Information of &quot; + nutrientsPresenter.getSelectedFoodLabel());</span>
+<span class="nc" id="L144">        titleLBL.setId(&quot;title&quot;);</span>
+<span class="nc" id="L145">        mainBox.getChildren().add(titleLBL);</span>
+
+
+<span class="nc" id="L148">        measureBox = new HBox(20);</span>
+<span class="nc" id="L149">        measureBox.setAlignment(Pos.CENTER);</span>
+<span class="nc" id="L150">        mainBox.getChildren().add(measureBox);</span>
+
+<span class="nc" id="L152">        summaryBox = new VBox(10);</span>
+
+<span class="nc" id="L154">        mainBox.getChildren().add(summaryBox);</span>
+
+<span class="nc" id="L156">        ColumnConstraints cc = new ColumnConstraints();</span>
+<span class="nc" id="L157">        cc.setPercentWidth(100d / 6);</span>
+
+
+<span class="nc" id="L160">        nutrientsTable = new TreeTableView&lt;Nutrient&gt;();</span>
+<span class="nc" id="L161">        mainBox.getChildren().addAll(nutrientsTable);</span>
+
+<span class="nc" id="L163">        setUpTopBox();</span>
+
+<span class="nc" id="L165">        dietFP = new FlowPane();</span>
+<span class="nc" id="L166">        cautionFP = new FlowPane();</span>
+<span class="nc" id="L167">        healthFP = new FlowPane();</span>
+
+<span class="nc" id="L169">        setUpAdjustMeasure();</span>
+<span class="nc" id="L170">        setUpNutrientsTable();</span>
+<span class="nc" id="L171">        setUpSaveFoodBTN();</span>
+
+<span class="nc" id="L173">    }</span>
+
+
+
+    /***
+     * Sets up the input fields for measure and quantity
+     */
+    public void setUpAdjustMeasure(){
+
+<span class="nc" id="L182">        measureLBL = new Label(&quot;Select a measure&quot;);</span>
+<span class="nc" id="L183">        selectMeasure = new ComboBox&lt;String&gt;();</span>
+
+<span class="nc" id="L185">        Food food = (Food) nutrientsPresenter.getSelectedFood();</span>
+
+        // Add all the possible measures for this food
+        // to the dropdown measure field
+<span class="nc" id="L189">        measures = new HashMap&lt;String, Measure&gt;();</span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (Measure measure: food.getMeasures()){</span>
+<span class="nc" id="L192">            measures.put(measure.toString(), measure);</span>
+<span class="nc" id="L193">            selectMeasure.getItems().add(measure.toString());</span>
+<span class="nc" id="L194">        }</span>
+
+        // Quantity text field
+<span class="nc" id="L197">        quantityLBL = new Label(&quot;Input a quantity\n(integer only)&quot;);</span>
+<span class="nc" id="L198">        quantityLBL.setPadding(new Insets(0, 0, 0, 40));</span>
+<span class="nc" id="L199">        quantityTF = new TextField();</span>
+
+        // Stores any error messages
+<span class="nc" id="L202">        resultLBL = new Label(&quot;&quot;);</span>
+
+        // Shows the nutritional information
+<span class="nc" id="L205">        nutritionBTN = new Button(&quot;See nutritional information&quot;);</span>
+<span class="nc" id="L206">        setUpSeeNutritionalInfoBTN();</span>
+
+<span class="nc" id="L208">        measureBox.getChildren().addAll(measureLBL, selectMeasure, quantityLBL, quantityTF, nutritionBTN);</span>
+<span class="nc" id="L209">    }</span>
+
+    /***
+     * Calls the show nutrititional information method
+     */
+    public void setUpSeeNutritionalInfoBTN(){
+
+<span class="nc" id="L216">       nutritionBTN.setId(&quot;borderBTN&quot;);</span>
+
+<span class="nc" id="L218">        nutritionBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L219">            removeMSG();</span>
+
+            try {
+<span class="nc" id="L222">                nutrientsPresenter.seeNutritionalInformation(measures.get(selectMeasure.getValue()), quantityTF.getText());</span>
+<span class="nc" id="L223">            } catch (NumberFormatException n){</span>
+<span class="nc" id="L224">                displayErrorMSG(n.getMessage());</span>
+<span class="nc" id="L225">            } catch (IllegalArgumentException i){</span>
+<span class="nc" id="L226">                displayErrorMSG(i.getMessage());</span>
+<span class="nc" id="L227">            }</span>
+
+<span class="nc" id="L229">        });</span>
+
+<span class="nc" id="L231">        quantityTF.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L232">            removeMSG();</span>
+
+            try {
+<span class="nc" id="L235">                nutrientsPresenter.seeNutritionalInformation(measures.get(selectMeasure.getValue()), quantityTF.getText());</span>
+<span class="nc" id="L236">            } catch (NumberFormatException n){</span>
+<span class="nc" id="L237">                displayErrorMSG(n.getMessage());</span>
+<span class="nc" id="L238">            } catch (IllegalArgumentException i){</span>
+<span class="nc" id="L239">                displayErrorMSG(i.getMessage());</span>
+<span class="nc" id="L240">            }</span>
+
+<span class="nc" id="L242">        });</span>
+
+
+<span class="nc" id="L245">    }</span>
+
+    /***
+     * Displays error msg in red
+     * @param msg to display
+     */
+    public void displayErrorMSG(String msg){
+<span class="nc" id="L252">        resultLBL.setId(&quot;failure&quot;);</span>
+<span class="nc" id="L253">        resultLBL.setText(msg);</span>
+<span class="nc" id="L254">    }</span>
+
+    /***
+     * Displays success msg in green
+     * @param msg to display
+     */
+    public void displaySuccessMSG(String msg){
+<span class="nc" id="L261">        resultLBL.setId(&quot;success&quot;);</span>
+<span class="nc" id="L262">        resultLBL.setText(msg);</span>
+<span class="nc" id="L263">    }</span>
+
+    /***
+     * Sets up the extra non-domain specific aspects of view
+     */
+    public void setUpTopBox(){
+<span class="nc" id="L269">        borderPane.setTop(mainView.getTopSP());</span>
+<span class="nc" id="L270">    }</span>
+
+
+
+    /***
+     * Sets up the nutrients information table
+     */
+    public void setUpNutrientsTable(){
+
+<span class="nc" id="L279">        nutrientsTable.setPlaceholder(new Label(&quot;Please select a measure and quantity&quot;));</span>
+<span class="nc" id="L280">        nutrientsTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);</span>
+
+        // Stores the nutrient name
+<span class="nc" id="L283">        TreeTableColumn&lt;Nutrient, String&gt; col0 = new TreeTableColumn&lt;&gt;(&quot;Nutrient&quot;);</span>
+<span class="nc" id="L284">        nutrientsTable.getColumns().add(col0);</span>
+<span class="nc" id="L285">        col0.setMaxWidth(10000);</span>
+<span class="nc" id="L286">        col0.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L287">        col0.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L291">                Nutrient nutrient = n.getValue().getValue();</span>
+
+<span class="nc" id="L293">                return new SimpleStringProperty(nutrientsPresenter.formatNutrientSTR(nutrient));</span>
+
+            }
+        });
+
+        // Stores the total quantity of a nutrient
+<span class="nc" id="L299">        TreeTableColumn&lt;Nutrient, String&gt; col1 = new TreeTableColumn&lt;&gt;(&quot;Quantity&quot;);</span>
+<span class="nc" id="L300">        nutrientsTable.getColumns().add(col1);</span>
+<span class="nc" id="L301">        col1.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L302">        col1.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L303">        col1.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L307">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L308">                return new SimpleStringProperty(nutrientsPresenter.formatQuantitySTR(nutrient));</span>
+
+            }
+        });
+
+
+        // Stores the actual total quantity of list of saved foods
+<span class="nc" id="L315">        TreeTableColumn&lt;Nutrient, String&gt; col2 = new TreeTableColumn&lt;&gt;(&quot;Running Total&quot;);</span>
+<span class="nc" id="L316">        nutrientsTable.getColumns().add(col2);</span>
+<span class="nc" id="L317">        col2.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L318">        col2.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L319">        col2.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L323">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L324">                return new SimpleStringProperty(nutrientsPresenter.formatRunningTotalSTR(nutrient));</span>
+
+            }
+        });
+
+        // Stores the resulting total quantity of list of saved foods if nutrient was added
+<span class="nc" id="L330">        TreeTableColumn&lt;Nutrient, String&gt; col3 = new TreeTableColumn&lt;&gt;(&quot;Resulting\nRunning Total&quot;);</span>
+<span class="nc" id="L331">        nutrientsTable.getColumns().add(col3);</span>
+<span class="nc" id="L332">        col3.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L333">        col3.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L334">        col3.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L338">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L339">                return new SimpleStringProperty(nutrientsPresenter.formatResultingRunningTotalSTR(nutrient));</span>
+
+            }
+        });
+
+        // Stores the set maximum quantity of each nutrient
+<span class="nc" id="L345">        TreeTableColumn&lt;Nutrient, String&gt; col4 = new TreeTableColumn&lt;&gt;(&quot;Maximum&quot;);</span>
+<span class="nc" id="L346">        nutrientsTable.getColumns().add(col4);</span>
+<span class="nc" id="L347">        col4.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L348">        col4.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L349">        col4.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L353">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L354">                return new SimpleStringProperty(nutrientsPresenter.formatMaximumSTR(nutrient));</span>
+
+            }
+        });
+
+        // Stores the total nutrients of a food as a daily %
+<span class="nc" id="L360">        TreeTableColumn&lt;Nutrient, String&gt; col5 = new TreeTableColumn&lt;&gt;(&quot;Daily (%)&quot;);</span>
+<span class="nc" id="L361">        nutrientsTable.getColumns().add(col5);</span>
+<span class="nc" id="L362">        col5.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L363">        col5.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L364">        col5.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient, String&gt; n) {
+
+<span class="nc" id="L368">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L369">                return new SimpleStringProperty(nutrientsPresenter.formatTotalDailySTR(nutrient));</span>
+
+            }
+        });
+
+
+
+
+<span class="nc" id="L377">    }</span>
+
+
+    /***
+     * Removes msg from view
+     */
+    public void removeMSG(){
+<span class="nc" id="L384">        resultLBL.setText(&quot;&quot;);</span>
+<span class="nc" id="L385">        resultLBL.setId(&quot;gone&quot;);</span>
+<span class="nc" id="L386">    }</span>
+
+
+
+    /***
+     *  Summary box set up
+     *  Calories, total weight, diet labels, health labels, cautions
+     */
+    public void showSummaryInformation(Food food){
+
+<span class="nc" id="L396">        selectedFood = food;</span>
+
+        // clears the summary box info first
+<span class="nc" id="L399">        summaryBox.setPadding(new Insets(0, 20, 0, 20));</span>
+<span class="nc" id="L400">        summaryBox.getChildren().clear();</span>
+
+<span class="nc" id="L402">        HBox caloriesBox = new HBox(10);</span>
+<span class="nc" id="L403">        caloriesLBL = new Label(selectedFood.getCalories() + &quot;&quot;);</span>
+<span class="nc" id="L404">        caloriesNameLBL.setId(&quot;nutrients&quot;);</span>
+<span class="nc" id="L405">        caloriesBox.getChildren().add(caloriesNameLBL);</span>
+<span class="nc" id="L406">        caloriesBox.getChildren().add(caloriesLBL);</span>
+<span class="nc" id="L407">        summaryBox.getChildren().add(caloriesBox);</span>
+
+<span class="nc" id="L409">        HBox totalWeightBox = new HBox(10);</span>
+<span class="nc" id="L410">        totalWeightNameLBL.setId(&quot;nutrients&quot;);</span>
+<span class="nc" id="L411">        totalWeightLBL = new Label(selectedFood.getTotalWeight() + &quot; g&quot;);</span>
+<span class="nc" id="L412">        totalWeightLBL.setTextAlignment(TextAlignment.LEFT);</span>
+<span class="nc" id="L413">        totalWeightBox.getChildren().add(totalWeightNameLBL);</span>
+<span class="nc" id="L414">        totalWeightBox.getChildren().add(totalWeightLBL);</span>
+<span class="nc" id="L415">        summaryBox.getChildren().add(totalWeightBox);</span>
+
+
+        // Diet labels
+<span class="nc" id="L419">        HBox dietBox = new HBox(10);</span>
+<span class="nc" id="L420">        dietBox.setId(&quot;nutrientsBox&quot;);</span>
+<span class="nc" id="L421">        dietBox.getChildren().add(dietLabelsLBL);</span>
+<span class="nc" id="L422">        dietLabelsLBL.setId(&quot;nutrients&quot;);</span>
+
+<span class="nc" id="L424">        dietFP = new FlowPane();</span>
+<span class="nc" id="L425">        dietFP.setVgap(6);</span>
+<span class="nc" id="L426">        dietFP.setPrefWrapLength(1200);</span>
+
+<span class="nc bnc" id="L428" title="All 4 branches missed.">        if (food.getDietLabels() == null || food.getDietLabels().size() == 0){</span>
+<span class="nc" id="L429">            Label newLabel = new Label(&quot;none&quot;);</span>
+<span class="nc" id="L430">            dietFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L431">        } else {</span>
+
+<span class="nc bnc" id="L433" title="All 2 branches missed.">            for (String diet : food.getDietLabels()){</span>
+<span class="nc" id="L434">                Label newLabel = new Label(diet + &quot;  |  &quot;);</span>
+<span class="nc" id="L435">                dietFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L436">            }</span>
+        }
+
+<span class="nc" id="L439">        dietBox.getChildren().addAll(dietFP);</span>
+
+<span class="nc" id="L441">        summaryBox.getChildren().add(dietBox);</span>
+
+        // Health labels
+<span class="nc" id="L444">        HBox healthBox = new HBox(10);</span>
+<span class="nc" id="L445">        healthBox.setId(&quot;nutrientsBox&quot;);</span>
+<span class="nc" id="L446">        healthBox.getChildren().add(healthLabelsLBL);</span>
+<span class="nc" id="L447">        healthLabelsLBL.setId(&quot;nutrients&quot;);</span>
+
+<span class="nc" id="L449">        healthFP = new FlowPane();</span>
+<span class="nc" id="L450">        healthFP.setVgap(6);</span>
+<span class="nc" id="L451">        healthFP.setPrefWrapLength(1200);</span>
+
+<span class="nc bnc" id="L453" title="All 4 branches missed.">        if (food.getHealthLabels() == null || food.getHealthLabels().size() == 0){</span>
+<span class="nc" id="L454">            Label newLabel = new Label(&quot;none&quot;);</span>
+<span class="nc" id="L455">            healthFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L456">        } else {</span>
+
+<span class="nc bnc" id="L458" title="All 2 branches missed.">            for (String health : food.getHealthLabels()){</span>
+<span class="nc" id="L459">                Label newLabel = new Label(health + &quot;  |  &quot;);</span>
+<span class="nc" id="L460">                healthFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L461">            }</span>
+        }
+
+<span class="nc" id="L464">        healthBox.getChildren().addAll(healthFP);</span>
+<span class="nc" id="L465">        summaryBox.getChildren().add(healthBox);</span>
+
+        // Cautions
+<span class="nc" id="L468">        HBox cautionBox = new HBox(10);</span>
+<span class="nc" id="L469">        cautionBox.setId(&quot;nutrientsBox&quot;);</span>
+<span class="nc" id="L470">        cautionBox.getChildren().add(cautionLBL);</span>
+<span class="nc" id="L471">        cautionLBL.setId(&quot;nutrients&quot;);</span>
+<span class="nc" id="L472">        cautionFP = new FlowPane();</span>
+<span class="nc" id="L473">        cautionFP.setVgap(6);</span>
+<span class="nc" id="L474">        cautionFP.setPrefWrapLength(1200);</span>
+
+<span class="nc bnc" id="L476" title="All 4 branches missed.">        if (food.getCautions() == null ||  food.getCautions().size() == 0){</span>
+<span class="nc" id="L477">            Label newLabel = new Label(&quot;none&quot;);</span>
+<span class="nc" id="L478">            cautionFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L479">        } else {</span>
+<span class="nc bnc" id="L480" title="All 2 branches missed.">            for (String caution : food.getCautions()){</span>
+<span class="nc" id="L481">                Label newLabel = new Label(caution + &quot;  |  &quot;);</span>
+<span class="nc" id="L482">                cautionFP.getChildren().add(newLabel);</span>
+<span class="nc" id="L483">            }</span>
+        }
+
+<span class="nc" id="L486">        cautionBox.getChildren().add(cautionFP);</span>
+<span class="nc" id="L487">        summaryBox.getChildren().add(cautionBox);</span>
+
+<span class="nc" id="L489">    }</span>
+
+
+    public void refreshTable(){
+<span class="nc" id="L493">        nutrientsTable.refresh();</span>
+<span class="nc" id="L494">    }</span>
+
+    /***
+     *  Show nutrition information in table
+     */
+    public void showNutrientsTable(){
+
+        // Store all the nutrients
+<span class="nc" id="L502">        Map&lt;String, Nutrient&gt; nutrientMap = nutrientsPresenter.getRunningTotalNutrientsList();</span>
+
+        // Subcategory - Fat
+<span class="nc" id="L505">        TreeItem&lt;Nutrient&gt; fat = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;fats&quot;, &quot;Fats&quot;));</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">        for (String fatStr: nutrientsPresenter.getFatStrings()){</span>
+<span class="nc" id="L507">            fat.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(fatStr)));</span>
+<span class="nc" id="L508">        }</span>
+
+        // Subcategory - Carbs
+<span class="nc" id="L511">        TreeItem&lt;Nutrient&gt; carbs = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;carbs&quot;, &quot;Carbs&quot;));</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        for (String carb: nutrientsPresenter.getCarbStrings()){</span>
+<span class="nc" id="L513">            carbs.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(carb)));</span>
+<span class="nc" id="L514">        }</span>
+
+        // Overall category
+<span class="nc" id="L517">        TreeItem&lt;Nutrient&gt; nutrients = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;nutrients&quot;, &quot;Nutrients&quot;));</span>
+<span class="nc" id="L518">        nutrients.setExpanded(true);</span>
+<span class="nc" id="L519">        nutrients.getChildren().add(fat);</span>
+<span class="nc" id="L520">        nutrients.getChildren().add(carbs);</span>
+
+        // Add the other nutrient types
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        for (String nutrient: nutrientMap.keySet() ){</span>
+
+<span class="nc bnc" id="L525" title="All 4 branches missed.">            if (nutrientsPresenter.getCarbStrings().contains(nutrient) || nutrientsPresenter.getFatStrings().contains(nutrient)){</span>
+<span class="nc" id="L526">                continue;</span>
+            }
+<span class="nc" id="L528">            nutrients.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(nutrient)));</span>
+<span class="nc" id="L529">        }</span>
+
+<span class="nc" id="L531">        nutrientsTable.setRoot(nutrients);</span>
+<span class="nc" id="L532">    }</span>
+
+    /***
+     * Shows the nutritional information for a food
+     */
+    public void showNutrientsInformation(Food selectedFood){
+
+<span class="nc" id="L539">        titleLBL.setText(&quot;Nutrition Information of &quot; + nutrientsPresenter.getSelectedFoodLabel() + &quot; - &quot;</span>
+<span class="nc" id="L540">                + selectMeasure.getValue());</span>
+
+<span class="nc" id="L542">        showNutrientsTable();</span>
+<span class="nc" id="L543">        showSummaryInformation(selectedFood);</span>
+
+<span class="nc" id="L545">    }</span>
+
+    /***
+     * Sets up the button for saving an ingredient
+     */
+    public void setUpSaveFoodBTN(){
+
+<span class="nc" id="L552">        saveFoodBTN = new Button(&quot; Save Ingredient&quot;);</span>
+<span class="nc" id="L553">        ImageView saveIV = new ImageView(new Image(&quot;heart.png&quot;));</span>
+<span class="nc" id="L554">        saveIV.setFitHeight(20.0);</span>
+<span class="nc" id="L555">        saveIV.setFitWidth(20.0);</span>
+<span class="nc" id="L556">        saveFoodBTN.setGraphic(saveIV);</span>
+<span class="nc" id="L557">        saveFoodBTN.setId(&quot;borderBTN&quot;);</span>
+
+<span class="nc" id="L559">        saveFoodBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L560">            removeMSG();</span>
+
+<span class="nc" id="L562">            nutrientsPresenter.saveFood(measures.get(selectMeasure.getValue()), quantityTF.getText());</span>
+<span class="nc" id="L563">        });</span>
+
+<span class="nc" id="L565">        mainBox.getChildren().addAll(saveFoodBTN, resultLBL);</span>
+<span class="nc" id="L566">    }</span>
+
+    @Override
+    public void openSettings(VBox settingsMenu){
+<span class="nc" id="L570">        borderPane.setRight(settingsMenu);</span>
+
+<span class="nc" id="L572">    }</span>
+
+
+    @Override
+    public void closeSettings(VBox settingsMenu){
+<span class="nc" id="L577">        borderPane.setRight(null);</span>
+
+<span class="nc" id="L579">    }</span>
+
+
+    @Override
+    public void setColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                           String tableColour, String quantityColour,
+                           String maxQuantityColour){
+
+
+        // table colours
+<span class="nc" id="L589">        nutrientsTable.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L590">        nutrientsTable.lookup(&quot;.column-header-background &quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L591">        nutrientsTable.lookup(&quot;.column-header-background .filler&quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+
+<span class="nc" id="L593">        nutrientsTable.lookupAll(&quot;.tree-table-view .column-header&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L595">            node.setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L596">        });</span>
+
+<span class="nc" id="L598">        nutrientsTable.lookupAll(&quot;.column-border&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L600">            node.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L601">        });</span>
+
+<span class="nc" id="L603">        nutrientsTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L605">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour);</span>
+<span class="nc" id="L606">        });</span>
+
+<span class="nc" id="L608">        nutrientsTable.lookupAll(&quot;.label&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L610">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L611">        });</span>
+
+<span class="nc" id="L613">        nutrientsTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L615">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L616">        });</span>
+
+<span class="nc" id="L618">        nutrientsTable.lookupAll(&quot;.tree-table-column&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L620">            node.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L621">        });</span>
+
+        // text
+<span class="nc" id="L624">        titleLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L625">        cautionLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L626">        healthLabelsLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L627">        dietLabelsLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L628">        totalWeightLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L629">        totalWeightNameLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L630">        caloriesLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L631">        caloriesNameLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L632">        measureLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L633">        quantityLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+<span class="nc" id="L635">        dietFP.getChildren().forEach((node) -&gt; {</span>
+<span class="nc" id="L636">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L637">        });</span>
+
+<span class="nc" id="L639">        cautionFP.getChildren().forEach((node) -&gt; {</span>
+<span class="nc" id="L640">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L641">        });</span>
+
+<span class="nc" id="L643">        healthFP.getChildren().forEach((node) -&gt; {</span>
+<span class="nc" id="L644">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L645">        });</span>
+
+       // buttons
+
+<span class="nc" id="L649">        saveFoodBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+<span class="nc" id="L650">        nutritionBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+
+        // background
+<span class="nc" id="L653">        scene.setFill(Paint.valueOf(backgroundColour));</span>
+
+<span class="nc" id="L655">        refreshTable();</span>
+
+<span class="nc" id="L657">    }</span>
+
+    /***
+     * Sets up an alert to ask user if they want to
+     * use the cache version of the data or not
+     */
+    public void setUpCacheHitAlert(){
+
+<span class="nc" id="L665">        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);</span>
+
+<span class="nc" id="L667">        alert.setContentText(&quot;Cache hit for this data – use cache, or request fresh data from the API?&quot;);</span>
+<span class="nc" id="L668">        ((Button) alert.getDialogPane().lookupButton(ButtonType.OK)).setText(&quot;Yes&quot;);</span>
+<span class="nc" id="L669">        ((Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText(&quot;No&quot;);</span>
+
+<span class="nc" id="L671">        alert.getDialogPane().setStyle(&quot; -fx-font-family: 'Comfortaa';&quot;);</span>
+
+<span class="nc" id="L673">        Optional&lt;ButtonType&gt; result = alert.showAndWait();</span>
+
+<span class="nc bnc" id="L675" title="All 4 branches missed.">        if (result.isPresent() &amp;&amp; result.get() == ButtonType.OK) {</span>
+
+<span class="nc" id="L677">            nutrientsPresenter.modelSelectAFood(true);</span>
+
+<span class="nc bnc" id="L679" title="All 4 branches missed.">        } else if (result.isPresent() &amp;&amp; result.get() == ButtonType.CANCEL) {</span>
+
+            // HTTP CALL
+<span class="nc" id="L682">            nutrientsPresenter.modelSelectAFood(false);</span>
+        } else {
+
+        }
+<span class="nc" id="L686">    }</span>
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

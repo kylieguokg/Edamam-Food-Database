@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodDBDummy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">FoodDBDummy.java</span></div><h1>FoodDBDummy.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/***
+ * Stores dummy data for food database
+ */
+public class FoodDBDummy implements FoodDB {
+
+<span class="nc" id="L12">    private List&lt;Food&gt; searchResults = new ArrayList&lt;Food&gt;();</span>
+    private Food selectedFood;
+<span class="nc" id="L14">    private List&lt;Food&gt; savedFoods = new ArrayList&lt;&gt;();</span>
+
+    /***
+     * Stores the nutrients for the running total nutrients
+     */
+    private TotalNutrients runningTotalsTotalNutrients;
+
+    /***
+     * Stores the nutrients for the maximum total nutrients
+     */
+    private TotalNutrients maximumTotalNutrients;
+
+    /***
+     *   Returns the resulting total nutrients for the saved list of foods
+     *   if a food was added
+     */
+    private TotalNutrients tempTotalNutrients;
+
+    /***
+     *   Returns the resulting total nutrients (as daily %) for the saved list of foods
+     *   if a food was added
+     */
+    private TotalNutrients tempTotalDaily;
+
+    /***
+     * Stores the nutrients for the running total nutrients (as daily %)
+     */
+    private TotalNutrients runningTotalsTotalDaily;
+
+    private Measure kilogram;
+
+<span class="nc" id="L45">    public FoodDBDummy(){</span>
+
+<span class="nc" id="L47">        kilogram = new Measure(&quot;http://www.edamam.com/ontologies/edamam.owl#Measure_kilogram&quot;,&quot;Kilogram&quot;, 1000.0 );</span>
+
+<span class="nc" id="L49">        Nutrients chickenNuggetNutrients = new Nutrients(261, 14.36, 15.42, 16.24, 0.7);</span>
+<span class="nc" id="L50">        searchResults.add(new Food(&quot;food_bdxovpmabzq0y1b37dux7abl5muq&quot;,</span>
+                                    &quot;Chicken Nugget&quot;,
+                                            chickenNuggetNutrients,
+                                    &quot;Generic Goods&quot;,
+                                &quot;food&quot;,
+                                    &quot;https://www.edamam.com/food-img/853/853b7c281a7108739b5b987fe290e60e.jpg&quot;,
+<span class="nc" id="L56">                                    Arrays.asList(kilogram)));</span>
+
+
+<span class="nc" id="L59">        Nutrients friesNutrients = new Nutrients(148.66307203479482, 3.936514854062405, 8.403066008379524, 14.908645877377431, 1.6772995925974905);</span>
+<span class="nc" id="L60">        searchResults.add(new Food(&quot;food_b7vp79wa0fu0mhblo2wbsabxfeuk&quot;,</span>
+                &quot;Fries&quot;,
+                friesNutrients,
+                &quot;Generic meals&quot;,
+                &quot;meal&quot;,
+                null ,
+<span class="nc" id="L66">                Arrays.asList(kilogram)));</span>
+
+<span class="nc" id="L68">        Nutrients milkshakeNutrients = new Nutrients(111.19183306951875, 2.6275819949275006, 6.470881939898806, 10.844772620634227, 0.6272453613911275);</span>
+<span class="nc" id="L69">        searchResults.add(new Food(&quot;food_amf2riyabwez2qa51ytu4bkog0eh&quot;,</span>
+                &quot;Milkshakes&quot;,
+                milkshakeNutrients,
+                &quot;Generic meals&quot;,
+                &quot;meal&quot;,
+                null,
+<span class="nc" id="L75">                 Arrays.asList(kilogram)));</span>
+
+<span class="nc" id="L77">        savedFoods = new ArrayList&lt;Food&gt;();</span>
+<span class="nc" id="L78">    }</span>
+
+    @Override
+    public String enterAnIngredient(String ingredient) {
+<span class="nc" id="L82">        return &quot;ok&quot;;</span>
+    }
+
+    @Override
+    public String selectAFood(int quantity, Measure measure, Food food, boolean cachedVersion) {
+
+<span class="nc" id="L88">        selectedFood = food;</span>
+
+<span class="nc" id="L90">        selectedFood.setSelectedMeasure(kilogram);</span>
+
+<span class="nc" id="L92">        selectedFood.setCalories(100.0);</span>
+<span class="nc" id="L93">        selectedFood.setTotalWeight(100.0);</span>
+<span class="nc" id="L94">        selectedFood.setDietLabels(Arrays.asList(&quot;YUM&quot;));</span>
+<span class="nc" id="L95">        selectedFood.setHealthLabels(Arrays.asList(&quot;FUN&quot;));</span>
+<span class="nc" id="L96">        selectedFood.setCautions(Arrays.asList(&quot;HOT&quot;));</span>
+
+<span class="nc" id="L98">        TotalNutrients totalNutrients = new TotalNutrients();</span>
+<span class="nc" id="L99">        totalNutrients.setQuantities(28.0);</span>
+<span class="nc" id="L100">        selectedFood.setTotalNutrients(totalNutrients);</span>
+
+<span class="nc" id="L102">        TotalNutrients totalDaily = new TotalNutrients();</span>
+<span class="nc" id="L103">        totalDaily.setQuantities(50.0);</span>
+<span class="nc" id="L104">        totalDaily.setUnits(&quot;%&quot;);</span>
+<span class="nc" id="L105">        selectedFood.setTotalDaily(totalDaily);</span>
+
+<span class="nc" id="L107">        return &quot;ok&quot;;</span>
+    }
+
+    @Override
+    public List&lt;Food&gt; getSearchResults() {
+<span class="nc" id="L112">        return searchResults;</span>
+    }
+
+    @Override
+    public Food getSelectedFood() {
+<span class="nc" id="L117">        return selectedFood;</span>
+    }
+
+    @Override
+    public void setSelectedFood(Food food) {
+<span class="nc" id="L122">        this.selectedFood = food;</span>
+<span class="nc" id="L123">    }</span>
+
+
+    @Override
+    public boolean checkIfCachedVersion(Measure measure, Food food, int quantity){
+<span class="nc" id="L128">        return false;</span>
+    }
+
+    @Override
+    public boolean login(String username, String password){
+<span class="nc" id="L133">        return true;</span>
+    }
+
+    @Override
+    public boolean createUser(String username, String password){
+<span class="nc" id="L138">        return true;</span>
+    }
+
+    @Override
+    public User getUser(){
+<span class="nc" id="L143">        return new User(&quot;user&quot;);</span>
+    }
+
+    @Override
+    public void saveColours(){
+        // no database for dummy so do nothing
+<span class="nc" id="L149">    }</span>
+
+    @Override
+    public void saveTotalNutrients(){
+        // no database for dummy so do nothing
+<span class="nc" id="L154">    }</span>
+
+
+
+    @Override
+    public String saveFood(Food food){
+<span class="nc" id="L160">        savedFoods.add(food);</span>
+<span class="nc" id="L161">        return &quot;ok&quot;;</span>
+    }
+
+    @Override
+    public List&lt;Food&gt; getSavedFoods(){
+<span class="nc" id="L166">        return savedFoods;</span>
+    }
+
+    @Override
+    public void clearCache(){
+        // no database for dummy so do nothing
+<span class="nc" id="L172">    }</span>
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

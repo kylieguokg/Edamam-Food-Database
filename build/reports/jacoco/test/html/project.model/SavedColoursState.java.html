@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SavedColoursState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">SavedColoursState.java</span></div><h1>SavedColoursState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages the saved colours of a user
+ */
+public class SavedColoursState implements Subject{
+
+    /***
+     * Stores the user's saved colours
+     */
+    private FoodDB foodDB;
+
+    /***
+     * Currently logged in user
+     */
+    private User currentUser;
+
+    /***
+     * List of observers who need to be updated if the saved colours state is changed
+     */
+<span class="fc" id="L24">    private List&lt;Observer&gt; observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+
+    /***
+     * Returns whether or not the colours were saved
+     */
+<span class="fc" id="L29">    private boolean coloursUpdated = false;</span>
+
+    /***
+     * Returns whether or not dark mode status was saved
+     */
+<span class="fc" id="L34">    private boolean darkModeUpdated = false;</span>
+
+<span class="fc" id="L36">    public SavedColoursState(FoodDB foodDB, User currentUser){</span>
+<span class="fc" id="L37">        this.foodDB = foodDB;</span>
+<span class="fc" id="L38">        this.currentUser = currentUser;</span>
+<span class="fc" id="L39">    }</span>
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L45">            observer.update();</span>
+<span class="fc" id="L46">        }</span>
+
+        // reset
+<span class="fc" id="L49">        coloursUpdated = false;</span>
+<span class="fc" id="L50">        darkModeUpdated = false;</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L55">        observerList.add(observer);</span>
+<span class="fc" id="L56">    }</span>
+
+    /***
+     * Saves user's colour preferences to database
+     * @param darkMode
+     * @param backgroundColour
+     * @param buttonColour
+     * @param textColour
+     * @param tableColour
+     * @param quantityColour
+     * @param maxQuantityColour
+     */
+    public void saveColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                            String tableColour, String quantityColour, String maxQuantityColour){
+
+<span class="fc" id="L71">        currentUser.setDarkMode(darkMode);</span>
+<span class="fc" id="L72">        currentUser.setBackgroundColour(backgroundColour);</span>
+<span class="fc" id="L73">        currentUser.setButtonColour(buttonColour);</span>
+<span class="fc" id="L74">        currentUser.setTextColour(textColour);</span>
+<span class="fc" id="L75">        currentUser.setTableColour(tableColour);</span>
+<span class="fc" id="L76">        currentUser.setQuantityColour(quantityColour);</span>
+<span class="fc" id="L77">        currentUser.setMaxQuantityColour(maxQuantityColour);</span>
+
+        // save colours to database
+<span class="fc" id="L80">        foodDB.saveColours();</span>
+
+<span class="fc" id="L82">        coloursUpdated = true;</span>
+<span class="fc" id="L83">        notifyObservers();</span>
+<span class="fc" id="L84">    }</span>
+
+
+    public boolean isColoursUpdated() {
+<span class="fc" id="L88">        return coloursUpdated;</span>
+    }
+
+
+    /***
+     * Sets the user's preferences to dark mode
+     */
+    public void setDarkMode() {
+<span class="fc" id="L96">        currentUser.setDarkMode();</span>
+<span class="fc" id="L97">        foodDB.saveColours();</span>
+<span class="fc" id="L98">        darkModeUpdated = true;</span>
+<span class="fc" id="L99">        notifyObservers();</span>
+<span class="fc" id="L100">    }</span>
+
+    public boolean darkModeUpdated(){
+<span class="fc" id="L103">        return darkModeUpdated;</span>
+    }
+
+    public User getUser(){
+<span class="nc" id="L107">        return currentUser;</span>
+    }
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L113">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L115">    }</span>
+
+
+    public boolean isDarkMode(){
+<span class="nc" id="L119">        return currentUser.isDarkMode();</span>
+    }
+
+    public String getTextColour() {
+<span class="nc" id="L123">        return currentUser.getTextColour();</span>
+    }
+
+    public String getButtonColour() {
+<span class="nc" id="L127">        return currentUser.getButtonColour();</span>
+    }
+
+    public String getBackgroundColour() {
+<span class="nc" id="L131">        return currentUser.getBackgroundColour();</span>
+    }
+
+    public String getTableColour() {
+<span class="nc" id="L135">        return currentUser.getTableColour();</span>
+    }
+
+    public String getMaxQuantityColour() {
+<span class="nc" id="L139">        return currentUser.getMaxQuantityColour();</span>
+    }
+
+<span class="nc" id="L142">    public String getQuantityColour() {return currentUser.getQuantityColour();}</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.presenter</a> &gt; <span class="el_source">MainPresenter.java</span></div><h1>MainPresenter.java</h1><pre class="source lang-java linenums">package project.presenter;
+
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+
+import project.model.Model;
+import project.model.Observer;
+import project.model.Output;
+import project.model.SavedColoursState;
+import project.model.SelectedFoodState;
+import project.model.LoginState;
+import project.view.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+
+/***
+ *  Manages all the presenters and switches between them as necessary
+ */
+public class MainPresenter implements Observer {
+
+    /***
+     * Stores the main view which is a container for the current view and the navigation and settings
+     */
+    private final MainView mainView;
+
+    /***
+     * Stores domain logic
+     */
+    private Model model;
+
+    /***
+     * Displays the main visual elements of model logic
+     */
+    private View currentView;
+
+    /***
+     * Responsible for mutating the current view and the model logic
+     */
+    private Presenter currentPresenter;
+
+    /***
+     * Responsible for mutating the login view and login state
+     */
+    private LoginPresenter loginPresenter;
+
+    /***
+     * Responsible for mutating the maximum nutrients view and the maximum nutrients state
+     */
+    private MaximumNutrientsPresenter maximumNutrientsPresenter;
+
+    /***
+     * Responsible for mutating the nutrients view and the nutrients state
+     */
+    private NutrientsPresenter nutrientsPresenter;
+
+    /***
+     * Responsible for mutating the Saved Foods View and Saved Foods state
+     */
+    private SavedFoodPresenter savedFoodsPresenter;
+
+    /***
+     * Responsible for mutating the search view and the search state
+     */
+    private SearchPresenter searchPresenter;
+
+    /***
+     *   Displays the login and registration page
+     */
+    private LoginView loginView;
+
+    /***
+     *  Manages the views and navigation
+     */
+    private MaximumNutrientsView maximumNutrientsView;
+
+    /***
+     *   Displays the nutrition information for a food
+     */
+    private NutrientsView nutrientsView;
+
+    /***
+     *  Displays the list of saved foods for a user
+     */
+    private SavedFoodsView savedFoodsView;
+
+    /***
+     *   Displays the search interface for searching for a food in the database
+     */
+    private SearchView searchView;
+
+    /***
+     * Manages the saved colours of a user
+     */
+    private SavedColoursState savedColoursState;
+
+    /***
+     * Manages the sending of output in the app
+     */
+    private Output output;
+
+    /***
+     * Manages the logging in and registration of new users
+     */
+    private LoginState loginState;
+
+    /***
+     * Manages the process of retrieving the total
+     * nutritional information for a selected food
+     */
+    private SelectedFoodState selectedFoodState;
+
+<span class="nc" id="L114">    private final ExecutorService pool = Executors.newFixedThreadPool(2, runnable -&gt; {</span>
+<span class="nc" id="L115">        Thread thread = new Thread(runnable);</span>
+<span class="nc" id="L116">        thread.setDaemon(true); // background thread</span>
+<span class="nc" id="L117">        return thread ;</span>
+    });
+
+<span class="nc" id="L120">    public MainPresenter(Model model, MainView mainView){</span>
+<span class="nc" id="L121">        this.model = model;</span>
+<span class="nc" id="L122">        this.mainView = mainView;</span>
+<span class="nc" id="L123">        this.loginState = model.getLoginState();</span>
+
+<span class="nc" id="L125">        loginState.subscribe(this);</span>
+<span class="nc" id="L126">    }</span>
+
+    /*
+       First go to login view
+     */
+    public void setUp(){
+<span class="nc" id="L132">        goToLoginView();</span>
+<span class="nc" id="L133">    }</span>
+
+    @Override
+    public void update(){
+
+        // if the user was logged in
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (loginState.getLoggedIn()) {</span>
+
+            // move to next page
+<span class="nc" id="L142">            mainSetup();</span>
+        }
+
+<span class="nc bnc" id="L145" title="All 6 branches missed.">        if (output == null || savedColoursState == null || selectedFoodState == null){</span>
+<span class="nc" id="L146">            return;</span>
+        }
+
+        // if a food has been selected from the search page
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (selectedFoodState.isFoodSelectedSet()){</span>
+            // continue to nutrients scene,
+            // where user chooses quantity and measure to
+            // see more specific nutritional information
+<span class="nc" id="L154">            goToNutrientsScene();</span>
+
+        }
+
+        // if the nutrients presenter needs the colours to be set again
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (nutrientsPresenter != null){</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (nutrientsPresenter.isNeedColourUpdate()){</span>
+<span class="nc" id="L161">                setColours();</span>
+            }
+        }
+
+        // if the nutrients presenter needs the colours to be set again
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (maximumNutrientsPresenter != null){</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (maximumNutrientsPresenter.isNeedColourUpdate()){</span>
+<span class="nc" id="L168">                setColours();</span>
+            }
+        }
+
+        // if error MSG was received, display it
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (output.getErrorMSG() != null){</span>
+<span class="nc" id="L174">            setOutputTXT(output.getErrorMSG());</span>
+        }
+
+        // if result from an attempt to post to Pastebin was received, display result
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (output.getOutputLink() != null){</span>
+<span class="nc" id="L179">            setOutputTXT(output.getOutputLink());</span>
+        }
+
+        // if an attempt to login was successful, now attempt to post to Reddit
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (output.getRedditLoggedUserIn() != null) {</span>
+<span class="nc" id="L184">            postToReddit();</span>
+        }
+
+        // if result from an attempt to post to Reddit was received, display result
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (output.getRedditOutputLink() != null){</span>
+<span class="nc" id="L189">            setOutputTXT(output.getRedditOutputLink());</span>
+        }
+
+        // if colours have been updated, set the colours of the view
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (savedColoursState.isColoursUpdated()){</span>
+<span class="nc" id="L194">            setColours();</span>
+        }
+
+        // if dark mode has been updated, set the view respectively
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (savedColoursState.darkModeUpdated()){</span>
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            if (savedColoursState.isDarkMode()) {</span>
+<span class="nc" id="L201">                mainView.setDarkMode();</span>
+            } else {
+<span class="nc" id="L203">                mainView.setLightMode();</span>
+            }
+
+<span class="nc" id="L206">            setColours();</span>
+        }
+
+
+
+
+
+
+<span class="nc" id="L214">    }</span>
+
+
+    /***
+     * Sets colours of the settings as well as the current view, as per user's preferences
+     */
+    public void setColours(){
+
+<span class="nc" id="L222">        mainView.setColours(savedColoursState.isDarkMode(),</span>
+<span class="nc" id="L223">                            savedColoursState.getBackgroundColour(),</span>
+<span class="nc" id="L224">                            savedColoursState.getButtonColour(),</span>
+<span class="nc" id="L225">                            savedColoursState.getTextColour(),</span>
+<span class="nc" id="L226">                            savedColoursState.getTableColour(),</span>
+<span class="nc" id="L227">                            savedColoursState.getQuantityColour(),</span>
+<span class="nc" id="L228">                            savedColoursState.getMaxQuantityColour());</span>
+
+<span class="nc" id="L230">        currentView.setColours(savedColoursState.isDarkMode(),</span>
+<span class="nc" id="L231">                savedColoursState.getBackgroundColour(),</span>
+<span class="nc" id="L232">                savedColoursState.getButtonColour(),</span>
+<span class="nc" id="L233">                savedColoursState.getTextColour(),</span>
+<span class="nc" id="L234">                savedColoursState.getTableColour(),</span>
+<span class="nc" id="L235">                savedColoursState.getQuantityColour(),</span>
+<span class="nc" id="L236">                savedColoursState.getMaxQuantityColour());</span>
+<span class="nc" id="L237">    }</span>
+
+
+    /***
+     * Goes to the login view - first page
+     */
+    public void goToLoginView(){
+
+<span class="nc" id="L245">        LoginView loginView = new LoginView();</span>
+<span class="nc" id="L246">        LoginPresenter loginPresenter = new LoginPresenter(model.getLoginState(), loginView);</span>
+<span class="nc" id="L247">        loginView.display(loginPresenter);</span>
+<span class="nc" id="L248">        mainView.goToView(loginView);</span>
+<span class="nc" id="L249">    }</span>
+
+    /***
+     * Main set up that is completed after user has logged in
+     */
+    public void mainSetup(){
+<span class="nc" id="L255">        this.savedColoursState = model.getSavedColoursState();</span>
+<span class="nc" id="L256">        this.output = model.getOutput();</span>
+<span class="nc" id="L257">        this.selectedFoodState = model.getSelectedFoodState();</span>
+
+        // main presenter manages the colours and sending of output
+<span class="nc" id="L260">        savedColoursState.subscribe(this);</span>
+<span class="nc" id="L261">        output.subscribe(this);</span>
+<span class="nc" id="L262">        selectedFoodState.subscribe(this);</span>
+
+
+        // set up navigation bar
+<span class="nc" id="L266">        mainView.setUpTopBox();</span>
+
+        // first page is search view
+<span class="nc" id="L269">        goToSearchView();</span>
+
+<span class="nc" id="L271">    }</span>
+
+    /***
+     *   Goes to the search view
+     */
+    public void goToSearchView(){
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (currentPresenter != null){</span>
+<span class="nc" id="L279">            currentPresenter.unsubscribePresenter();</span>
+        }
+
+<span class="nc" id="L282">        this.searchView = new SearchView(mainView);</span>
+<span class="nc" id="L283">        this.searchPresenter = new SearchPresenter(model.getSearchState(),</span>
+<span class="nc" id="L284">                                                    model.getSelectedFoodState(),</span>
+                                                    searchView);
+
+<span class="nc" id="L287">        this.currentView = searchView;</span>
+<span class="nc" id="L288">        this.currentPresenter = searchPresenter;</span>
+
+<span class="nc" id="L290">        searchView.setUp(searchPresenter);</span>
+<span class="nc" id="L291">        mainView.goToView(currentView);</span>
+<span class="nc" id="L292">        setColours();</span>
+
+<span class="nc" id="L294">    }</span>
+
+
+    /***
+     *   Goes to the nutrition information for a food view
+     */
+    public void goToNutrientsScene(){
+
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if (currentPresenter != null){</span>
+<span class="nc" id="L303">            currentPresenter.unsubscribePresenter();</span>
+        }
+
+<span class="nc" id="L306">        this.nutrientsView = new NutrientsView(mainView);</span>
+<span class="nc" id="L307">        this.nutrientsPresenter = new NutrientsPresenter(model, nutrientsView);</span>
+
+<span class="nc" id="L309">        this.currentView = nutrientsView;</span>
+<span class="nc" id="L310">        this.currentPresenter = nutrientsPresenter;</span>
+
+<span class="nc" id="L312">        nutrientsView.setUp(nutrientsPresenter);</span>
+<span class="nc" id="L313">        mainView.goToView(currentView);</span>
+<span class="nc" id="L314">        setColours();</span>
+<span class="nc" id="L315">        nutrientsPresenter.subscribe(this);</span>
+<span class="nc" id="L316">    }</span>
+
+
+    /***
+     *   Goes to the running total nutrition
+     *   information for a user's saved list of foods
+     */
+    public void goToMaxNutrients(){
+
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (currentPresenter != null){</span>
+<span class="nc" id="L326">            currentPresenter.unsubscribePresenter();</span>
+        }
+
+<span class="nc" id="L329">        this.maximumNutrientsView = new MaximumNutrientsView(mainView);</span>
+<span class="nc" id="L330">        this.maximumNutrientsPresenter = new MaximumNutrientsPresenter(model.getMaximumNutrientsState(),</span>
+                                                                     maximumNutrientsView);
+<span class="nc" id="L332">        this.currentView = maximumNutrientsView;</span>
+<span class="nc" id="L333">        this.currentPresenter = maximumNutrientsPresenter;</span>
+
+<span class="nc" id="L335">        maximumNutrientsView.setUp(maximumNutrientsPresenter);</span>
+<span class="nc" id="L336">        mainView.goToView(currentView);</span>
+<span class="nc" id="L337">        maximumNutrientsPresenter.subscribe(this);</span>
+<span class="nc" id="L338">        setColours();</span>
+
+<span class="nc" id="L340">    }</span>
+
+
+    /***
+     *   Goes to the list of saved foods for a user
+     */
+    public void goToSavedFoods(){
+
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if (currentPresenter != null){</span>
+<span class="nc" id="L349">            currentPresenter.unsubscribePresenter();</span>
+        }
+
+<span class="nc" id="L352">        this.savedFoodsView = new SavedFoodsView(mainView);</span>
+<span class="nc" id="L353">        this.savedFoodsPresenter  = new SavedFoodPresenter(model.getSavedFoodState(), savedFoodsView);</span>
+
+<span class="nc" id="L355">        this.currentView = savedFoodsView;</span>
+<span class="nc" id="L356">        this.currentPresenter = savedFoodsPresenter;</span>
+
+<span class="nc" id="L358">        savedFoodsView.setUp(savedFoodsPresenter);</span>
+<span class="nc" id="L359">        mainView.goToView(currentView);</span>
+<span class="nc" id="L360">        setColours();</span>
+
+<span class="nc" id="L362">    }</span>
+
+
+    /***
+     * Sends output to Pastebin
+     */
+    public void output(){
+<span class="nc" id="L369">        Task&lt;String&gt; task = new Task&lt;String&gt;() {</span>
+            @Override
+            protected String call() throws Exception {
+<span class="nc" id="L372">                model.output();</span>
+<span class="nc" id="L373">                return null;</span>
+            }
+        };
+
+<span class="nc" id="L377">        pool.execute(task);</span>
+
+<span class="nc" id="L379">    }</span>
+
+
+    /***
+     * Clears user's cache of search results
+     */
+    public void clearCache(){
+<span class="nc" id="L386">        model.clearCache();</span>
+<span class="nc" id="L387">        mainView.cacheClearedAlert();</span>
+<span class="nc" id="L388">    }</span>
+
+    /***
+     * Saves colours to user
+     * @param darkMode
+     * @param backgroundColour
+     * @param buttonColour
+     * @param textColour
+     * @param tableColour
+     * @param quantityColour
+     * @param maxQuantityColour
+     */
+    public void saveColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                            String tableColour, String quantityColour, String maxQuantityColour) {
+
+<span class="nc" id="L403">        savedColoursState.saveColours(darkMode, backgroundColour, buttonColour, textColour, tableColour, quantityColour, maxQuantityColour);</span>
+
+<span class="nc" id="L405">    }</span>
+
+    /***
+     * Sets the output alert box to display message
+     * @param out message
+     */
+    public void setOutputTXT(String out){
+
+<span class="nc" id="L413">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L414">           mainView.setOutputTXT(out);</span>
+<span class="nc" id="L415">        });</span>
+<span class="nc" id="L416">    }</span>
+
+
+    /***
+     * Saves dark mode status to user
+     */
+    public void setDarkMode() {
+<span class="nc" id="L423">        savedColoursState.setDarkMode();</span>
+<span class="nc" id="L424">    }</span>
+
+    /***
+     * Posts to Reddit
+     */
+    public void postToReddit(){
+
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        if (output.isUserLoggedInReddit()){</span>
+
+<span class="nc" id="L433">            Task&lt;String&gt; task = new Task&lt;String&gt;() {</span>
+                @Override
+                protected String call() throws Exception {
+<span class="nc" id="L436">                    model.postToReddit();</span>
+<span class="nc" id="L437">                    return null;</span>
+                }
+            };
+
+<span class="nc" id="L441">            pool.execute(task);</span>
+
+<span class="nc" id="L443">        } else {</span>
+<span class="nc" id="L444">            mainView.setUpRedditLogin();</span>
+        }
+
+
+<span class="nc" id="L448">    }</span>
+
+    /***
+     * Logs user in to Reddit
+     * @param username Reddit username
+     * @param password Reddit password
+     */
+    public void loginReddit(String username, String password){
+<span class="nc" id="L456">        output.getAccessToken(username, password);</span>
+<span class="nc" id="L457">    }</span>
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

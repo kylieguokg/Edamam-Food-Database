@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelectedFoodState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">SelectedFoodState.java</span></div><h1>SelectedFoodState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages the process of retrieving the total
+ * nutritional information for a selected food
+ */
+public class SelectedFoodState implements Subject{
+
+    /**
+     * Currently logged in user
+     */
+    private User currentUser;
+
+    /***
+     * Stores the user's saved foods
+     */
+    private FoodDB foodDB;
+
+    /***
+     * Currently selected food
+     */
+    private Food selectedFood;
+
+    /***
+     * State of an attempt to select food
+     */
+    private String selectedFoodState;
+
+    /***
+     * Currently selected measure for selected food
+     */
+    private Measure selectedMeasure;
+
+
+    /***
+     * Returns whether or not a cached version is available
+     */
+    private boolean cachedVersionAvailable;
+
+
+    /***
+     * List of observers who need to be updated if the selected foods state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    /**
+     * State of attempt to check if there's a cached version
+     */
+    private String cachedState;
+
+    /**
+     * If the food selected has been set
+     */
+    private boolean foodSelectedSet;
+
+<span class="fc" id="L59">    public SelectedFoodState(FoodDB foodDB){</span>
+<span class="fc" id="L60">        this.foodDB = foodDB;</span>
+<span class="fc" id="L61">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+<span class="fc" id="L62">    }</span>
+
+    public Food getSelectedFood(){
+<span class="fc" id="L65">        return selectedFood;</span>
+    }
+
+    public String getSelectedFoodLabel(){
+<span class="nc" id="L69">        return selectedFood.getLabel();</span>
+    }
+
+    public void selectAFood(int quantity, Measure measure, Food food,
+                            boolean cachedVersion,
+                            TotalNutrients runningTotalsTotalNutrients,
+                            TotalNutrients runningTotalsTotalDaily){
+
+<span class="fc" id="L77">        String out = foodDB.selectAFood(quantity, measure, food, cachedVersion);</span>
+
+        // show result of select
+<span class="fc" id="L80">        selectedFoodState = out;</span>
+<span class="fc" id="L81">        selectedFood = foodDB.getSelectedFood();</span>
+
+<span class="fc" id="L83">        notifyObservers();</span>
+<span class="fc" id="L84">    }</span>
+
+
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L92">            observer.update();</span>
+<span class="fc" id="L93">        }</span>
+
+
+        // reset states
+<span class="fc" id="L97">        cachedState = null;</span>
+<span class="fc" id="L98">        selectedFoodState = null;</span>
+<span class="fc" id="L99">        foodSelectedSet = false;</span>
+<span class="fc" id="L100">    }</span>
+
+    /***
+     * Checks if there is a cached version of the data for this food, measure and quantity
+     * @param measure
+     * @param food
+     * @param quantity
+     */
+    public void checkIfCachedVersion(Measure measure, Food food, int quantity){
+<span class="fc" id="L109">        cachedVersionAvailable = foodDB.checkIfCachedVersion(measure, food, quantity);</span>
+<span class="fc" id="L110">        cachedState = &quot;ok&quot;;</span>
+<span class="fc" id="L111">        notifyObservers();</span>
+<span class="fc" id="L112">    }</span>
+
+    /***
+     * Returns whether there is a cached version available of the food
+     * @return
+     */
+    public boolean isCachedVersionAvailable(){
+<span class="fc" id="L119">        return cachedVersionAvailable;</span>
+    }
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L124">        observerList.add(observer);</span>
+<span class="fc" id="L125">    }</span>
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L130">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L132">    }</span>
+
+    /***
+     * State of an attempt to select food
+     * @return State of an attempt to select food
+     */
+    public String getSelectedFoodState(){
+<span class="fc" id="L139">        return selectedFoodState;</span>
+    }
+
+    public boolean isFoodSelectedSet(){
+<span class="nc" id="L143">        return foodSelectedSet;</span>
+    }
+
+
+    /***
+     * Sets the currently selected food by the user
+     * @param food
+     */
+    public void setSelectedFood(Food food) {
+<span class="nc" id="L152">        this.selectedFood = food;</span>
+<span class="nc" id="L153">        foodSelectedSet = true;</span>
+<span class="nc" id="L154">        notifyObservers();</span>
+<span class="nc" id="L155">    }</span>
+
+    /**
+     * State of attempt to check if there's a cached version
+     * @return state of attempt to check if there's a cached version
+     */
+    public String getCachedState(){
+<span class="fc" id="L162">        return cachedState;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

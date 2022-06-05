@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SavedFoodsView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">SavedFoodsView.java</span></div><h1>SavedFoodsView.java</h1><pre class="source lang-java linenums">package project.view;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import project.model.Food;
+import project.presenter.SavedFoodPresenter;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.*;
+import javafx.util.Callback;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+import java.util.List;
+
+
+/***
+ *  Displays the list of saved foods for a user
+ */
+public class SavedFoodsView implements View {
+
+    private MainView mainView;
+    private BorderPane borderPane;
+    private ScrollPane scrollPane;
+    private Scene scene;
+
+    /***
+     * Stores all the main nodes
+     */
+    private VBox mainBox;
+
+    /***
+     * Displays the foods in the saved list of foods
+     */
+    private TableView&lt;Food&gt; savedTable;
+
+
+
+    private Label titleLBL;
+
+    private ImageView maxNutrientsIV;
+    /***
+     * Responsible for mutating the Saved Foods View and Saved Foods state
+     */
+    private SavedFoodPresenter savedFoodPresenter;
+
+    private Button outputBTN;
+    private Button redditBTN;
+    private Button maxNutrientsBTN;
+
+    private HBox saveBTNBox;
+
+
+<span class="nc" id="L66">    public SavedFoodsView(MainView mainView){</span>
+<span class="nc" id="L67">        this.mainView = mainView;</span>
+<span class="nc" id="L68">        this.borderPane = new BorderPane();</span>
+<span class="nc" id="L69">        this.scene = new Scene(borderPane, 1400, 800);</span>
+<span class="nc" id="L70">        scene.getStylesheets().add(mainView.getStyleSheet());</span>
+
+<span class="nc" id="L72">        mainBox = new VBox(30);</span>
+<span class="nc" id="L73">        mainBox.getStyleClass().add(&quot;vbox&quot;);</span>
+<span class="nc" id="L74">        mainBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L76">        scrollPane = new ScrollPane();</span>
+<span class="nc" id="L77">        scrollPane.setContent(mainBox);</span>
+<span class="nc" id="L78">        scrollPane.setPadding(new Insets(0, 50, 50, 50));</span>
+<span class="nc" id="L79">        borderPane.setCenter(scrollPane);</span>
+<span class="nc" id="L80">        scrollPane.fitToWidthProperty().set(true);</span>
+
+<span class="nc" id="L82">        titleLBL = new Label(&quot;Your Saved Foods&quot;);</span>
+<span class="nc" id="L83">        titleLBL.setId(&quot;title&quot;);</span>
+<span class="nc" id="L84">        mainBox.getChildren().add(titleLBL);</span>
+
+<span class="nc" id="L86">        setUpTopBox();</span>
+
+<span class="nc" id="L88">        setUpSaveBTNBox();</span>
+<span class="nc" id="L89">    }</span>
+
+    public void setUpTopBox(){
+<span class="nc" id="L92">        borderPane.setTop(mainView.getTopSP());</span>
+<span class="nc" id="L93">    }</span>
+
+
+    @Override
+    public Scene getScene(){
+<span class="nc" id="L98">        return scene;</span>
+    }
+
+
+    public void setUpSaveBTNBox(){
+<span class="nc" id="L103">        saveBTNBox = new HBox(20);</span>
+<span class="nc" id="L104">        saveBTNBox.setStyle(&quot;-fx-alignment: CENTER&quot;);</span>
+
+<span class="nc" id="L106">        ImageView outputIV = new ImageView(&quot;pastebin-logo.png&quot;);</span>
+<span class="nc" id="L107">        outputIV.setFitHeight(25.0);</span>
+<span class="nc" id="L108">        outputIV.setFitWidth(25.0);</span>
+<span class="nc" id="L109">        outputBTN = new Button(&quot;  Post to Pastebin&quot;);</span>
+<span class="nc" id="L110">        outputBTN.setGraphic(outputIV);</span>
+<span class="nc" id="L111">        outputBTN.setId(&quot;borderBTN&quot;);</span>
+<span class="nc" id="L112">        saveBTNBox.getChildren().add(outputBTN);</span>
+<span class="nc" id="L113">        mainView.setUpOutputBTN(outputBTN);</span>
+
+<span class="nc" id="L115">        ImageView redditIV = new ImageView(&quot;reddit-logo.png&quot;);</span>
+<span class="nc" id="L116">        redditIV.setFitHeight(25.0);</span>
+<span class="nc" id="L117">        redditIV.setFitWidth(25.0);</span>
+<span class="nc" id="L118">        redditBTN = new Button(&quot;  Post to Reddit&quot;);</span>
+<span class="nc" id="L119">        redditBTN.setGraphic(redditIV);</span>
+<span class="nc" id="L120">        redditBTN.setId(&quot;borderBTN&quot;);</span>
+<span class="nc" id="L121">        saveBTNBox.getChildren().add(redditBTN);</span>
+<span class="nc" id="L122">        mainView.setUpRedditBTN(redditBTN);</span>
+
+<span class="nc" id="L124">        maxNutrientsIV = new ImageView(&quot;dark-mode/white-nutrition.png&quot;);</span>
+<span class="nc" id="L125">        maxNutrientsIV.setFitHeight(25.0);</span>
+<span class="nc" id="L126">        maxNutrientsIV.setFitWidth(25.0);</span>
+<span class="nc" id="L127">        maxNutrientsBTN = new Button(&quot;  See Total Nutritional Information&quot;);</span>
+<span class="nc" id="L128">        maxNutrientsBTN.setGraphic(maxNutrientsIV);</span>
+<span class="nc" id="L129">        maxNutrientsBTN.setId(&quot;borderBTN&quot;);</span>
+<span class="nc" id="L130">        saveBTNBox.getChildren().add(maxNutrientsBTN);</span>
+<span class="nc" id="L131">        mainView.setUpMaxNutrientsBTN(maxNutrientsBTN);</span>
+
+<span class="nc" id="L133">        mainBox.getChildren().add(saveBTNBox);</span>
+<span class="nc" id="L134">    }</span>
+
+
+    /***
+     * Sets up main elements of view
+     */
+    public void setUp(SavedFoodPresenter savedFoodPresenter){
+
+<span class="nc" id="L142">        this.savedFoodPresenter = savedFoodPresenter;</span>
+
+<span class="nc" id="L144">        setUpSavedTable();</span>
+<span class="nc" id="L145">        showSavedTable();</span>
+
+<span class="nc" id="L147">    }</span>
+
+
+
+    /***
+     * Sets up the saved ingredients table
+     */
+    public void setUpSavedTable(){
+
+<span class="nc" id="L156">        savedTable = new TableView&lt;Food&gt;();</span>
+<span class="nc" id="L157">        mainBox.getChildren().add(savedTable);</span>
+
+<span class="nc" id="L159">        savedTable.setPlaceholder(new Label(&quot;No results&quot;));</span>
+<span class="nc" id="L160">        savedTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);</span>
+
+<span class="nc" id="L162">        TableColumn&lt;Food, String&gt; col1 = new TableColumn&lt;&gt;(&quot;Food ID&quot;);</span>
+<span class="nc" id="L163">        savedTable.getColumns().add(col1);</span>
+<span class="nc" id="L164">        col1.setMaxWidth(7000);</span>
+<span class="nc" id="L165">        col1.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L166">        col1.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;foodId&quot;));</span>
+
+<span class="nc" id="L168">        TableColumn&lt;Food, String&gt; col2 = new TableColumn&lt;&gt;(&quot;Label&quot;);</span>
+<span class="nc" id="L169">        savedTable.getColumns().add(col2);</span>
+<span class="nc" id="L170">        col2.setMaxWidth(9000);</span>
+<span class="nc" id="L171">        col2.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L172">        col2.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;label&quot;));</span>
+
+<span class="nc" id="L174">        TableColumn&lt;Food, String&gt; col3 = new TableColumn&lt;&gt;(&quot;Energy&quot;);</span>
+<span class="nc" id="L175">        savedTable.getColumns().add(col3);</span>
+<span class="nc" id="L176">        col3.setMaxWidth(2000);</span>
+<span class="nc" id="L177">        col3.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L178">        col3.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L179">        col3.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L182">                Food food = f.getValue();</span>
+<span class="nc" id="L183">                return new SimpleStringProperty(savedFoodPresenter.getEnergyFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L187">        TableColumn&lt;Food, String&gt; col4= new TableColumn&lt;&gt;(&quot;Protein&quot;);</span>
+<span class="nc" id="L188">        savedTable.getColumns().add(col4);</span>
+<span class="nc" id="L189">        col4.setMaxWidth(2000);</span>
+<span class="nc" id="L190">        col4.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L191">        col4.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L192">        col4.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L195">                Food food = f.getValue();</span>
+<span class="nc" id="L196">                return new SimpleStringProperty(savedFoodPresenter.getProteinFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L200">        TableColumn&lt;Food, String&gt; col5 = new TableColumn&lt;&gt;(&quot;Fat&quot;);</span>
+<span class="nc" id="L201">        savedTable.getColumns().add(col5);</span>
+<span class="nc" id="L202">        col5.setMaxWidth(2000);</span>
+<span class="nc" id="L203">        col5.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L204">        col5.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L205">        col5.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L208">                Food food = f.getValue();</span>
+<span class="nc" id="L209">                return new SimpleStringProperty(savedFoodPresenter.getFatFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L213">        TableColumn&lt;Food, String&gt; col6 = new TableColumn&lt;&gt;(&quot;Carbohydrate&quot;);</span>
+<span class="nc" id="L214">        savedTable.getColumns().add(col6);</span>
+<span class="nc" id="L215">        col6.setMaxWidth(3000);</span>
+<span class="nc" id="L216">        col6.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L217">        col6.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L218">        col6.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L221">                Food food = f.getValue();</span>
+<span class="nc" id="L222">                return new SimpleStringProperty(savedFoodPresenter.getCarbohydrateFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L226">        TableColumn&lt;Food, String&gt; col7= new TableColumn&lt;&gt;(&quot;Fibre&quot;);</span>
+<span class="nc" id="L227">        savedTable.getColumns().add(col7);</span>
+<span class="nc" id="L228">        col7.setMaxWidth(2500);</span>
+<span class="nc" id="L229">        col7.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L230">        col7.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L231">        col7.setCellValueFactory(new Callback&lt;TableColumn.CellDataFeatures&lt;Food, String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TableColumn.CellDataFeatures&lt;Food, String&gt; f) {
+<span class="nc" id="L234">                Food food = f.getValue();</span>
+<span class="nc" id="L235">                return new SimpleStringProperty(savedFoodPresenter.getFibreFormat(food));</span>
+            }
+        });
+
+<span class="nc" id="L239">        TableColumn&lt;Food, String&gt; col8 = new TableColumn&lt;&gt;(&quot;Category\nLabel&quot;);</span>
+<span class="nc" id="L240">        savedTable.getColumns().add(col8);</span>
+<span class="nc" id="L241">        col8.setMaxWidth(2500);</span>
+<span class="nc" id="L242">        col8.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L243">        col8.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;categoryLabel&quot;));</span>
+
+<span class="nc" id="L245">    }</span>
+
+
+    /***
+     * Inserts data into saved table
+     */
+    public void showSavedTable(){
+
+        // clear data first
+<span class="nc" id="L254">       savedTable.getItems().clear();</span>
+
+<span class="nc" id="L256">        List&lt;Food&gt; results =  savedFoodPresenter.getSavedFoods();</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        for (Food food : results) {</span>
+<span class="nc" id="L259">            savedTable.getItems().add(food);</span>
+<span class="nc" id="L260">        }</span>
+<span class="nc" id="L261">    }</span>
+
+    @Override
+    public void openSettings(VBox settingsMenu){
+<span class="nc" id="L265">        borderPane.setRight(settingsMenu);</span>
+<span class="nc" id="L266">    }</span>
+
+    @Override
+    public void closeSettings(VBox settingsMenu){
+<span class="nc" id="L270">        borderPane.setRight(null);</span>
+<span class="nc" id="L271">    }</span>
+
+    @Override
+    public void setColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                           String tableColour, String quantityColour,
+                           String maxQuantityColour){
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (darkMode){</span>
+<span class="nc" id="L279">            maxNutrientsIV.setImage(new Image(&quot;dark-mode/white-nutrition.png&quot;));</span>
+        } else {
+<span class="nc" id="L281">            maxNutrientsIV.setImage(new Image(&quot;light-mode/black-nutrition.png&quot;));</span>
+        }
+
+        // table colour
+<span class="nc" id="L285">        savedTable.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L286">        savedTable.lookup(&quot;.column-header-background &quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L287">        savedTable.lookup(&quot;.column-header-background .filler&quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+
+<span class="nc" id="L289">        savedTable.lookupAll(&quot;.tree-table-view .column-header&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L291">            node.setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L292">        });</span>
+
+<span class="nc" id="L294">        savedTable.lookupAll(&quot;.column-border&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L296">            node.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L297">        });</span>
+
+<span class="nc" id="L299">        savedTable.lookupAll(&quot;.label&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L301">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L302">        });</span>
+
+<span class="nc" id="L304">        savedTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L306">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L307">        });</span>
+
+<span class="nc" id="L309">        savedTable.lookupAll(&quot;.table-column&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L311">            node.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L312">        });</span>
+
+
+<span class="nc" id="L315">        savedTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L317">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour);</span>
+<span class="nc" id="L318">        });</span>
+
+        // button colour
+<span class="nc" id="L321">        redditBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+<span class="nc" id="L322">        outputBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+<span class="nc" id="L323">        maxNutrientsBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour + &quot;; -fx-text-fill: &quot; + buttonColour);</span>
+
+
+        // text colour
+<span class="nc" id="L327">        titleLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+
+        // background colour
+<span class="nc" id="L331">        scene.setFill(Paint.valueOf(backgroundColour));</span>
+<span class="nc" id="L332">    }</span>
+
+
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

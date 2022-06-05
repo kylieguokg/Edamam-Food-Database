@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Model.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">Model.java</span></div><h1>Model.java</h1><pre class="source lang-java linenums">package project.model;
+
+/***
+ * Manages the retrieval of database for the food
+ */
+public class Model implements Observer {
+
+
+    /***
+     * Stores all the data about the food
+     */
+    static FoodDB foodDB;
+
+    /***
+     * Output long report is to be sent to
+     */
+    static Output output;
+
+    /***
+     * Manages logging in and creating users
+     */
+    private LoginState loginState;
+
+    /***
+     * Manages the process of retrieving the total
+     * nutritional information for a selected food
+     */
+    private SelectedFoodState selectedFoodState;
+
+    /***
+     * Manages the process of searching for a food
+     */
+    private SearchState searchState;
+
+    /***
+     * Manages the process of saving a colour to a user's preferences
+     */
+    private SavedColoursState savedColoursState;
+
+    /***
+     * Manages the process of saving a food to a user's list of saved foods
+     */
+    private SavedFoodState savedFoodState;
+
+
+<span class="fc" id="L46">    public Model(FoodDB foodDB, Output output){</span>
+
+<span class="fc" id="L48">        this.foodDB = foodDB;</span>
+<span class="fc" id="L49">        this.output = output;</span>
+
+<span class="fc" id="L51">        loginState = new LoginState(foodDB);</span>
+<span class="fc" id="L52">        loginState.subscribe(this);</span>
+
+<span class="fc" id="L54">        selectedFoodState = new SelectedFoodState(foodDB);</span>
+<span class="fc" id="L55">        searchState = new SearchState(foodDB);</span>
+
+<span class="fc" id="L57">    }</span>
+
+    @Override
+    public void update(){
+
+        // once user has logged in, can fetch the saved colours and saved foods of the user
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (loginState.getLoggedIn()){</span>
+<span class="fc" id="L64">            savedColoursState = new SavedColoursState(foodDB,  loginState.getUser());</span>
+<span class="fc" id="L65">            savedFoodState = new SavedFoodState(foodDB,  loginState.getUser());</span>
+        }
+
+
+<span class="fc" id="L69">    }</span>
+
+    /***
+     * Saves the food to the user's list of saved foods
+     * Adjusts the running total of nutrients accordingly
+     */
+    public void saveFood(){
+<span class="nc" id="L76">        savedFoodState.saveFood(selectedFoodState.getSelectedFood());</span>
+<span class="nc" id="L77">    }</span>
+
+    /***
+     * Gets the login state, manages logging in and creating users
+     * @return the login state
+     */
+    public LoginState getLoginState() {
+<span class="fc" id="L84">        return loginState;</span>
+    }
+
+    /***
+     * Used for retrieving specific nutrition information
+     * about a food (with a measure) from the database
+     * @param quantity quantity of food
+     * @param measure measurement of food (e.g. kg)
+     * @param food food more data is being retrieved for
+     * @return search result (if search was successful or if there were any errors)
+     */
+    public void selectAFood(int quantity, Measure measure, Food food,
+                                boolean cachedVersion){
+
+<span class="nc" id="L98">        selectedFoodState.selectAFood(quantity, measure, food, cachedVersion,</span>
+<span class="nc" id="L99">                                    savedFoodState.getRunningTotalsTotalNutrients(),</span>
+<span class="nc" id="L100">                                    savedFoodState.getRunningTotalsTotalDaily() );</span>
+
+<span class="nc" id="L102">    }</span>
+
+    /***
+     * Gets the selected food state, manages the user selecting a food for more info
+     *  @return  the selected food state
+     */
+    public SelectedFoodState getSelectedFoodState(){
+<span class="nc" id="L109">        return selectedFoodState;</span>
+    }
+
+    /***
+     * Sends a long report of the list of currently selected ingredients (name, measure, value)
+     * along with the total nutritional value.
+     * @return if operation was successful, or any errors
+     */
+    public void output(){
+<span class="nc" id="L118">        output.output(savedFoodState.getOutputText());</span>
+<span class="nc" id="L119">    }</span>
+
+    /***
+     *  Posts to Reddit the list of saved foods output text
+     */
+    public void postToReddit(){
+<span class="nc" id="L125">        output.postToReddit(savedFoodState.getOutputText());</span>
+<span class="nc" id="L126">    }</span>
+
+    /***
+     * Clears cache of selected foods
+     */
+    public void clearCache() {
+<span class="nc" id="L132">        foodDB.clearCache();</span>
+<span class="nc" id="L133">    }</span>
+
+    /***
+     * Gets the search state, Manages the user searching for ingredients
+     *  @return  the search state
+     */
+    public SearchState getSearchState() {
+<span class="nc" id="L140">        return searchState;</span>
+    }
+
+    /***
+     * Gets the saved colours state which manages the user's personalisation settings
+     *  @return  the saved colours state
+     */
+    public SavedColoursState getSavedColoursState(){
+<span class="fc" id="L148">        return savedColoursState;</span>
+    }
+
+    /***
+     * Gets the maximum nutrients state, which manages the total quantities of nutrient
+     *  @return  the maximum nutrients state
+     */
+    public MaximumNutrientsState getMaximumNutrientsState(){
+<span class="nc" id="L156">        return savedFoodState.getMaximumNutrientsState();</span>
+    }
+
+
+    /***
+     * Gets the saved food state which manages the user's list of saved food
+     *  @return  the saved food state
+     */
+    public SavedFoodState getSavedFoodState(){
+<span class="fc" id="L165">        return savedFoodState;</span>
+    }
+
+
+    /***
+     * Gets the output state, which manages the sending of the report
+     *  @return  the output state
+     */
+    public Output getOutput() {
+<span class="nc" id="L174">        return output;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

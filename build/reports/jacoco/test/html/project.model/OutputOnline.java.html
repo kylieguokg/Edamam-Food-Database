@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OutputOnline.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">OutputOnline.java</span></div><h1>OutputOnline.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/***
+ * Manages the sending of output that requires the internet
+ */
+public class OutputOnline implements Output{
+
+    /***
+     * Manages sending the output report to PasteBin and Reddit
+     */
+    private OutputHTTP outputHTTP;
+
+    /***
+     * Helper class to convert json results from Reddit to get accessers
+     */
+    private OutputJsonParser outputJsonParser;
+
+    /***
+     * Access token that allows user to post to Reddit from app
+     */
+    private String redditAccessToken;
+
+    /***
+     * List of observers who need to be updated if output state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    /***
+     * State of a user's attempt to log in
+     */
+    private String redditUserLoggedIn;
+
+
+    /***
+     * Link to Reddit post of user's saved foods
+     */
+    private String redditOutputLink;
+
+    /***
+     * Link to Pastebin post of user's saved foods
+     */
+    private String pastebinOutputLink;
+
+    /***
+     * If reddit sucessfully logged in;
+     */
+    private boolean redditLoggedIn;
+
+    private String errorMSG;
+
+<span class="fc" id="L55">    public OutputOnline(OutputHTTP outputHTTP, OutputJsonParser outputJsonParser){</span>
+<span class="fc" id="L56">        this.outputHTTP = outputHTTP;</span>
+<span class="fc" id="L57">        this.outputJsonParser = outputJsonParser;</span>
+<span class="fc" id="L58">        this.observerList = new ArrayList&lt;Observer&gt;();</span>
+<span class="fc" id="L59">    }</span>
+
+    @Override
+    public void output(String text){
+
+<span class="fc" id="L64">        String out = outputHTTP.output(text);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (out.startsWith(&quot;ERROR&quot;)){</span>
+<span class="fc" id="L66">            errorMSG = out;</span>
+<span class="fc" id="L67">            notifyObservers();</span>
+        } else {
+<span class="fc" id="L69">            pastebinOutputLink = outputHTTP.getOutputLink();</span>
+<span class="fc" id="L70">            notifyObservers();</span>
+        }
+
+<span class="fc" id="L73">    }</span>
+
+    @Override
+    public String getOutputLink(){
+<span class="fc" id="L77">        return pastebinOutputLink;</span>
+    }
+
+    @Override
+    public boolean isUserLoggedInReddit(){
+<span class="nc" id="L82">       return redditLoggedIn;</span>
+    }
+
+    @Override
+    public void getAccessToken(String username, String password){
+
+<span class="fc" id="L88">        String out = outputHTTP.getAccessToken(username, password);</span>
+
+        // if there was a error with HTTP
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (out.startsWith(&quot;ERROR&quot;)){</span>
+<span class="fc" id="L92">            errorMSG = out;</span>
+<span class="fc" id="L93">            notifyObservers();</span>
+<span class="fc" id="L94">            return;</span>
+        } else {
+
+<span class="fc" id="L97">            redditAccessToken = outputJsonParser.getAccessToken(out);</span>
+
+            // error found in parsing
+<span class="pc bpc" id="L100" title="1 of 4 branches missed.">            if (redditAccessToken ==  null || redditAccessToken.startsWith(&quot;ERROR&quot;)){</span>
+<span class="fc" id="L101">                errorMSG = redditAccessToken;</span>
+<span class="fc" id="L102">                notifyObservers();</span>
+            } else {
+<span class="fc" id="L104">                redditUserLoggedIn = &quot;ok&quot;;</span>
+<span class="fc" id="L105">                redditLoggedIn = true;</span>
+<span class="fc" id="L106">                notifyObservers();</span>
+            }
+
+        }
+
+<span class="fc" id="L111">    }</span>
+
+    @Override
+    public void postToReddit(String output){
+
+<span class="fc" id="L116">        String out = outputHTTP.postToReddit(output, redditAccessToken);</span>
+
+        // if there was a error with HTTP
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (out.startsWith(&quot;ERROR&quot;)){</span>
+<span class="fc" id="L120">            errorMSG = out;</span>
+<span class="fc" id="L121">            notifyObservers();</span>
+<span class="fc" id="L122">            return;</span>
+        } else {
+
+<span class="fc" id="L125">            out = outputJsonParser.getOutputLink(out);</span>
+
+            // error found in parsing
+<span class="pc bpc" id="L128" title="1 of 4 branches missed.">            if (out ==  null || out.startsWith(&quot;ERROR&quot;)){</span>
+<span class="fc" id="L129">                errorMSG = out;</span>
+<span class="fc" id="L130">                notifyObservers();</span>
+            } else {
+<span class="fc" id="L132">                redditOutputLink = out;</span>
+<span class="fc" id="L133">                notifyObservers();</span>
+            }
+
+        }
+
+<span class="fc" id="L138">    }</span>
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L144">            observer.update();</span>
+<span class="fc" id="L145">        }</span>
+
+        // reset states
+<span class="fc" id="L148">        pastebinOutputLink = null;</span>
+<span class="fc" id="L149">        redditOutputLink = null;</span>
+<span class="fc" id="L150">        redditUserLoggedIn = null;</span>
+<span class="fc" id="L151">        errorMSG = null;</span>
+
+<span class="fc" id="L153">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L157">        observerList.add(observer);</span>
+<span class="fc" id="L158">    }</span>
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L163">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L165">    }</span>
+
+    @Override
+    public String getRedditLoggedUserIn(){
+<span class="fc" id="L169">        return redditUserLoggedIn;</span>
+    }
+
+
+    @Override
+    public String getRedditOutputLink(){
+<span class="fc" id="L175">        return redditOutputLink;</span>
+    }
+
+
+    @Override
+    public String getErrorMSG(){
+<span class="fc" id="L181">        return errorMSG;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

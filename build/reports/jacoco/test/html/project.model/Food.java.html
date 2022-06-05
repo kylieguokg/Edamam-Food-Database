@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Food.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">Food.java</span></div><h1>Food.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/*
+    Food item in Edanam Database
+ */
+public class Food {
+
+    private String foodId;
+    private String label;
+    private Nutrients nutrients;
+    private String category;
+    private String categoryLabel;
+    private String image;
+
+    /***
+     * Possible measures for this food
+     */
+<span class="pc" id="L22">    private List&lt;Measure&gt; measures = new ArrayList&lt;Measure&gt;();</span>
+
+    /***
+     * Information about each nutrient for food
+     */
+    private TotalNutrients totalNutrients;
+
+    /***
+     * Information about each nutrient for food, as a daily percentage
+     */
+    private TotalNutrients totalDaily;
+    private Double calories;
+    private List&lt;String&gt; dietLabels;
+    private List&lt;String&gt; healthLabels;
+    private List&lt;String&gt; cautions;
+    private Double totalWeight;
+    private Measure selectedMeasure;
+
+<span class="fc" id="L40">    public Food(String foodId, String label, Nutrients nutrients, String category, String categoryLabel, String image, List&lt;Measure&gt; measures) {</span>
+<span class="fc" id="L41">        this.foodId = foodId;</span>
+<span class="fc" id="L42">        this.label = label;</span>
+<span class="fc" id="L43">        this.nutrients = nutrients;</span>
+<span class="fc" id="L44">        this.category = category;</span>
+<span class="fc" id="L45">        this.categoryLabel = categoryLabel;</span>
+<span class="fc" id="L46">        this.image = image;</span>
+<span class="fc" id="L47">        this.measures = measures;</span>
+<span class="fc" id="L48">    }</span>
+
+<span class="fc" id="L50">    public Food(String foodId, String label, Nutrients nutrients, String category, String categoryLabel) {</span>
+<span class="fc" id="L51">        this.foodId = foodId;</span>
+<span class="fc" id="L52">        this.label = label;</span>
+<span class="fc" id="L53">        this.nutrients = nutrients;</span>
+<span class="fc" id="L54">        this.category = category;</span>
+<span class="fc" id="L55">        this.categoryLabel = categoryLabel;</span>
+<span class="fc" id="L56">        this.image = image;</span>
+<span class="fc" id="L57">        this.measures = measures;</span>
+<span class="fc" id="L58">    }</span>
+
+<span class="nc" id="L60">    public Food(String foodId, String label, String category, String categoryLabel) {</span>
+<span class="nc" id="L61">        this.foodId = foodId;</span>
+<span class="nc" id="L62">        this.label = label;</span>
+<span class="nc" id="L63">        this.category = category;</span>
+<span class="nc" id="L64">        this.categoryLabel = categoryLabel;</span>
+<span class="nc" id="L65">    }</span>
+
+
+    public void setCategory(String category){
+<span class="nc" id="L69">        this.category = category;</span>
+<span class="nc" id="L70">    }</span>
+
+    public String getFoodId() {
+<span class="fc" id="L73">        return foodId;</span>
+    }
+
+    public void setFoodId(String foodId) {
+<span class="nc" id="L77">        this.foodId = foodId;</span>
+<span class="nc" id="L78">    }</span>
+
+    public String getLabel() {
+<span class="fc" id="L81">        return label;</span>
+    }
+
+    public void setLabel(String label) {
+<span class="nc" id="L85">        this.label = label;</span>
+<span class="nc" id="L86">    }</span>
+
+    public Nutrients getNutrients() {
+<span class="fc" id="L89">        return nutrients;</span>
+    }
+
+    public void setNutrient(Nutrients nutrients) {
+<span class="nc" id="L93">        this.nutrients = nutrients;</span>
+<span class="nc" id="L94">    }</span>
+
+    public String getCategory() {
+<span class="fc" id="L97">        return category;</span>
+    }
+
+    public String getCategoryLabel() {
+<span class="fc" id="L101">        return categoryLabel;</span>
+    }
+
+    public void setCategoryLabel(String categoryLabel) {
+<span class="nc" id="L105">        this.categoryLabel = categoryLabel;</span>
+<span class="nc" id="L106">    }</span>
+
+    public String getImage() {
+<span class="nc" id="L109">        return image;</span>
+    }
+
+    public void setImage(String image) {
+<span class="nc" id="L113">        this.image = image;</span>
+<span class="nc" id="L114">    }</span>
+
+    public void addMeasure(Measure measure){
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (measures == null){</span>
+<span class="fc" id="L118">            measures = new ArrayList&lt;Measure&gt;();</span>
+        }
+<span class="fc" id="L120">        measures.add(measure);</span>
+<span class="fc" id="L121">    }</span>
+
+    public List&lt;Measure&gt; getMeasures(){
+<span class="fc" id="L124">        return measures;</span>
+    }
+
+
+    @Override
+    public String toString(){
+<span class="fc" id="L130">        String out =  &quot;FoodId: &quot; + foodId + &quot; | Label: &quot; + label + &quot;\n&quot; + nutrients.toString() +</span>
+                &quot;\nCategory: &quot; + category + &quot; | Category Label: &quot; + categoryLabel
+                + &quot;\nImage: &quot; + image
+<span class="fc" id="L133">                + &quot;\nSelected Measure (Quantity): &quot; + selectedMeasure.toString()</span>
+                + &quot;\n&quot;;
+
+<span class="fc" id="L136">        return out;</span>
+    }
+
+    public TotalNutrients getTotalNutrients() {
+<span class="fc" id="L140">        return totalNutrients;</span>
+    }
+
+    public void setTotalNutrients(TotalNutrients totalNutrients) {
+<span class="fc" id="L144">        this.totalNutrients = totalNutrients;</span>
+<span class="fc" id="L145">    }</span>
+
+    public void setNutrients(Nutrients nutrients) {
+<span class="nc" id="L148">        this.nutrients = nutrients;</span>
+<span class="nc" id="L149">    }</span>
+
+    public void setMeasures(List&lt;Measure&gt; measures) {
+<span class="nc" id="L152">        this.measures = measures;</span>
+<span class="nc" id="L153">    }</span>
+
+    public Double getCalories() {
+<span class="fc" id="L156">        return calories;</span>
+    }
+
+    public void setCalories(Double calories) {
+<span class="fc" id="L160">        this.calories = calories;</span>
+<span class="fc" id="L161">    }</span>
+
+    public List&lt;String&gt; getDietLabels() {
+<span class="fc" id="L164">        return dietLabels;</span>
+    }
+
+    public void setDietLabels(List&lt;String&gt; dietLabels) {
+<span class="fc" id="L168">        this.dietLabels = dietLabels;</span>
+<span class="fc" id="L169">    }</span>
+
+    public List&lt;String&gt; getHealthLabels() {
+<span class="fc" id="L172">        return healthLabels;</span>
+    }
+
+    public void setHealthLabels(List&lt;String&gt; healthLabels) {
+<span class="fc" id="L176">        this.healthLabels = healthLabels;</span>
+<span class="fc" id="L177">    }</span>
+
+    public List&lt;String&gt; getCautions() {
+<span class="fc" id="L180">        return cautions;</span>
+    }
+
+    public void setCautions(List&lt;String&gt; cautions) {
+<span class="fc" id="L184">        this.cautions = cautions;</span>
+<span class="fc" id="L185">    }</span>
+
+    public Double getTotalWeight() {
+<span class="fc" id="L188">        return totalWeight;</span>
+    }
+
+    public void setTotalWeight(Double totalWeight) {
+<span class="fc" id="L192">        this.totalWeight = totalWeight;</span>
+<span class="fc" id="L193">    }</span>
+
+    public TotalNutrients getTotalDaily() {
+<span class="fc" id="L196">        return totalDaily;</span>
+    }
+
+    public void setTotalDaily(TotalNutrients totalDaily) {
+<span class="fc" id="L200">        this.totalDaily = totalDaily;</span>
+<span class="fc" id="L201">    }</span>
+
+    public Measure getSelectedMeasure() {
+<span class="fc" id="L204">        return selectedMeasure;</span>
+    }
+
+    public void setSelectedMeasure(Measure selectedMeasure) {
+<span class="fc" id="L208">        this.selectedMeasure = selectedMeasure;</span>
+<span class="fc" id="L209">    }</span>
+
+    /***
+     *   @return Calories
+     */
+    public Double getENERC_KCAL(){
+<span class="nc" id="L215">        return nutrients.getENERC_KCAL();</span>
+    }
+
+    /***
+     *   @return Protein
+     */
+    public Double getPROCNT() {
+<span class="nc" id="L222">        return nutrients.getPROCNT();</span>
+    }
+
+    /***
+     *   @return Fat
+     */
+    public Double getFAT() {
+<span class="nc" id="L229">        return nutrients.getFAT();</span>
+    }
+
+    /***
+     *   @return Fibre
+     */
+    public Double getFIBTG() {
+<span class="nc" id="L236">        return nutrients.getFIBTG();</span>
+    }
+
+    /***
+     *   @return Carbohydrates (by difference)
+     */
+    public Double getCHOCDF() {
+<span class="nc" id="L243">        return nutrients.getCHOCDF();</span>
+    }
+
+
+    public Map&lt;String, Nutrient&gt; getNutrientsList(){
+<span class="fc" id="L248">        return totalNutrients.getNutrientList();</span>
+    }
+
+    public Map&lt;String, Nutrient&gt; getDailyNutrientsList(){
+<span class="fc" id="L252">        return totalDaily.getNutrientList();</span>
+    }
+
+    public Double getNutrientQuantity(String nutrient){
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        if (totalNutrients == null){</span>
+<span class="nc" id="L257">            return 0.0;</span>
+        }
+<span class="nc" id="L259">        return totalNutrients.getQuantity(nutrient);</span>
+    }
+
+    public Double getDailyNutrientQuantity(String nutrient){
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        if (totalDaily == null){</span>
+<span class="nc" id="L264">            return 0.0;</span>
+        }
+<span class="nc" id="L266">        return totalDaily.getQuantity(nutrient);</span>
+    }
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

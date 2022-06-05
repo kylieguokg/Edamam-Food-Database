@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.Map;
+
+/***
+ * User can have stored personalised colours and maximum total nutrients
+ */
+public class User {
+
+    private String username;
+
+    // default colours
+<span class="fc" id="L13">    private boolean darkMode = true;</span>
+<span class="fc" id="L14">    private String buttonColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L15">    private String textColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L16">    private String tableColour = &quot;#80B380&quot;;</span>
+<span class="fc" id="L17">    private String quantityColour = &quot;#99CCCC&quot;;</span>
+<span class="fc" id="L18">    private String maxQuantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L19">    private String backgroundColour = &quot;BLACK&quot;;</span>
+
+    /***
+     * Stores the user's maximum values for nutrients
+     */
+    private TotalNutrients maximumTotalNutrients;
+
+    /***
+     * Stores the nutrients for the running total nutrients
+     */
+    private TotalNutrients runningTotalsTotalNutrients;
+
+    /***
+     * Stores the nutrients for the running total nutrients (as daily %)
+     */
+    private TotalNutrients runningTotalsTotalDaily;
+
+<span class="fc" id="L36">    public User(String username){</span>
+<span class="fc" id="L37">        this.username = username;</span>
+<span class="fc" id="L38">        maximumTotalNutrients = new TotalNutrients();</span>
+<span class="fc" id="L39">        maximumTotalNutrients.setQuantities(500.0); // default value</span>
+
+        // default values
+<span class="fc" id="L42">        runningTotalsTotalNutrients = new TotalNutrients();</span>
+<span class="fc" id="L43">        runningTotalsTotalDaily = new TotalNutrients();</span>
+<span class="fc" id="L44">        runningTotalsTotalDaily.setUnits(&quot;%&quot;);</span>
+<span class="fc" id="L45">    }</span>
+
+    public boolean isDarkMode() {
+<span class="fc" id="L48">        return darkMode;</span>
+    }
+
+    /***
+     * Sets the colours to the default dark mode colours
+     */
+    public void setDarkMode() {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        this.darkMode = !darkMode;</span>
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (darkMode){</span>
+<span class="fc" id="L58">            this.buttonColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L59">            this.textColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L60">            this.tableColour = &quot;#80B380&quot;;</span>
+<span class="fc" id="L61">            this.quantityColour = &quot;#99CCCC&quot;;</span>
+<span class="fc" id="L62">            this.maxQuantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L63">            this.backgroundColour = &quot;BLACK&quot;;</span>
+        } else {
+<span class="fc" id="L65">            this.buttonColour = &quot;BLACK&quot;;</span>
+<span class="fc" id="L66">            this.textColour = &quot;BLACK&quot;;</span>
+<span class="fc" id="L67">            this.tableColour = &quot;#80B380&quot;;</span>
+<span class="fc" id="L68">            this.quantityColour = &quot;#99CCCC&quot;;</span>
+<span class="fc" id="L69">            this.maxQuantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L70">            this.backgroundColour = &quot;WHITE&quot;;</span>
+        }
+<span class="fc" id="L72">    }</span>
+
+    /***
+     * Sets the colours to the default dark mode colours
+     * @param darkMode if darkmode is on or not
+     */
+    public void setDarkMode(boolean darkMode) {
+<span class="fc" id="L79">        this.darkMode = darkMode;</span>
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (darkMode){</span>
+<span class="fc" id="L82">            this.buttonColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L83">            this.textColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L84">            this.tableColour = &quot;#80B380&quot;;</span>
+<span class="fc" id="L85">            this.quantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L86">            this.maxQuantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L87">            this.backgroundColour = &quot;BLACK&quot;;</span>
+        } else {
+<span class="fc" id="L89">            this.backgroundColour = &quot;WHITE&quot;;</span>
+<span class="fc" id="L90">            this.buttonColour = &quot;BLACK&quot;;</span>
+<span class="fc" id="L91">            this.textColour = &quot;BLACK&quot;;</span>
+<span class="fc" id="L92">            this.tableColour = &quot;#80B380&quot;;</span>
+<span class="fc" id="L93">            this.quantityColour = &quot;#A0B7FA&quot;;</span>
+<span class="fc" id="L94">            this.maxQuantityColour = &quot;#A0B7FA&quot;;</span>
+        }
+<span class="fc" id="L96">    }</span>
+
+    public String getButtonColour() {
+<span class="fc" id="L99">        return buttonColour;</span>
+    }
+
+    public void setButtonColour(String buttonColour) {
+<span class="fc" id="L103">        this.buttonColour = buttonColour;</span>
+<span class="fc" id="L104">    }</span>
+
+    public String getTextColour() {
+<span class="fc" id="L107">        return textColour;</span>
+    }
+
+    public void setTextColour(String textColour) {
+<span class="fc" id="L111">        this.textColour = textColour;</span>
+<span class="fc" id="L112">    }</span>
+
+    public String getQuantityColour() {
+<span class="fc" id="L115">        return quantityColour;</span>
+    }
+
+    public void setQuantityColour(String quantityColour) {
+<span class="fc" id="L119">        this.quantityColour = quantityColour;</span>
+<span class="fc" id="L120">    }</span>
+
+    public String getMaxQuantityColour() {
+<span class="fc" id="L123">        return maxQuantityColour;</span>
+    }
+
+    public void setMaxQuantityColour(String maxQuantityColour) {
+<span class="fc" id="L127">        this.maxQuantityColour = maxQuantityColour;</span>
+<span class="fc" id="L128">    }</span>
+
+    public String getBackgroundColour() {
+<span class="fc" id="L131">        return backgroundColour;</span>
+    }
+
+    public void setBackgroundColour(String backgroundColour) {
+<span class="fc" id="L135">        this.backgroundColour = backgroundColour;</span>
+<span class="fc" id="L136">    }</span>
+
+    public String getTableColour() {
+<span class="fc" id="L139">        return tableColour;</span>
+    }
+
+    public void setTableColour(String tableColour) {
+<span class="fc" id="L143">        this.tableColour = tableColour;</span>
+<span class="fc" id="L144">    }</span>
+
+    public String getUsername() {
+<span class="fc" id="L147">        return username;</span>
+    }
+
+    public TotalNutrients getMaximumTotalNutrients(){
+<span class="fc" id="L151">        return maximumTotalNutrients;</span>
+    }
+
+    public void setMaximumTotalNutrientValue(String nutrient, Double value){
+<span class="fc" id="L155">        this.maximumTotalNutrients.setQuantity(nutrient, value);</span>
+<span class="fc" id="L156">    }</span>
+
+    public Double getMaxNutrientQuantity(String nutrient) {
+<span class="nc" id="L159">        return maximumTotalNutrients.getQuantity(nutrient);</span>
+    }
+
+    public Map&lt;String, Nutrient&gt; getMaxTotalNutrientsList(){
+<span class="nc" id="L163">        return maximumTotalNutrients.getNutrientList();</span>
+    }
+
+    public TotalNutrients getRunningTotalsTotalNutrients(){
+<span class="nc" id="L167">        return runningTotalsTotalNutrients;</span>
+    }
+
+    public TotalNutrients getRunningTotalsTotalDaily(){
+<span class="nc" id="L171">        return runningTotalsTotalDaily;</span>
+    }
+
+    public void addToRunningTotalNutrientsValue(String nutrient, Double quantity){
+<span class="fc" id="L175">        runningTotalsTotalNutrients.addToQuantity(nutrient, quantity);</span>
+<span class="fc" id="L176">    }</span>
+
+    public void addToRunningTotalDailyNutrientsValue(String nutrient, Double quantity){
+<span class="fc" id="L179">        runningTotalsTotalDaily.addToQuantity(nutrient, quantity);</span>
+<span class="fc" id="L180">    }</span>
+
+    public Map&lt;String, Nutrient&gt; getRunningTotalNutrientsList(){
+<span class="fc" id="L183">        return runningTotalsTotalNutrients.getNutrientList();</span>
+    }
+
+    public Map&lt;String, Nutrient&gt; getRunningTotalDailyList(){
+<span class="fc" id="L187">        return runningTotalsTotalDaily.getNutrientList();</span>
+    }
+
+
+    public Double getRunningTotalDailyQuantity(String nutrient){
+<span class="nc" id="L192">        return runningTotalsTotalDaily.getQuantity(nutrient);</span>
+    }
+
+    public Double getRunningTotalQuantity(String nutrient){
+<span class="nc" id="L196">        return runningTotalsTotalNutrients.getQuantity(nutrient);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

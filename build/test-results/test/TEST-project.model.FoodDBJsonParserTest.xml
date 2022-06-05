@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="project.model.FoodDBJsonParserTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2022-06-05T09:44:58" hostname="Kylies-MacBook-Pro.local" time="0.146">
+  <properties/>
+  <testcase name="getSavedFoodsValid()" classname="project.model.FoodDBJsonParserTest" time="0.102"/>
+  <testcase name="getFoodNull()" classname="project.model.FoodDBJsonParserTest" time="0.002"/>
+  <testcase name="searchAFoodValidSearch()" classname="project.model.FoodDBJsonParserTest" time="0.02"/>
+  <testcase name="getFoodValid()" classname="project.model.FoodDBJsonParserTest" time="0.003"/>
+  <testcase name="getSavedFoodsNoFoods()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="selectAFoodError()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="selectAFoodValid()" classname="project.model.FoodDBJsonParserTest" time="0.005"/>
+  <testcase name="searchAFoodInvalidURI()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="searchAFoodHTTPError()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="getUserValid()" classname="project.model.FoodDBJsonParserTest" time="0.002"/>
+  <testcase name="searchAFoodNoResults()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="searchAFoodError()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="selectAFoodInvalidURI()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="getUserNull()" classname="project.model.FoodDBJsonParserTest" time="0.0"/>
+  <testcase name="selectAFoodHTTPError()" classname="project.model.FoodDBJsonParserTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

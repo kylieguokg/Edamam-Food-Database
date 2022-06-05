@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SearchState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">SearchState.java</span></div><h1>SearchState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages the process of searching for a food
+ */
+public class SearchState implements  Subject{
+
+    /***
+     * Stores mechanism to retrieve search results from Edanam API
+     */
+    private FoodDB foodDB;
+
+    /***
+     * Stores the search results of current search
+     */
+    private List&lt;Food&gt; searchResults;
+
+    /***
+     * List of observers who need to be updated if the search state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    /***
+     * State of search by user
+     */
+    private String searchState;
+
+<span class="fc" id="L31">    public SearchState(FoodDB foodDB){</span>
+<span class="fc" id="L32">        this.foodDB = foodDB;</span>
+<span class="fc" id="L33">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+<span class="fc" id="L34">    }</span>
+
+    public List&lt;Food&gt; getSearchResults(){
+<span class="fc" id="L37">        searchResults = foodDB.getSearchResults();</span>
+<span class="fc" id="L38">        return searchResults;</span>
+    }
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L44">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L46">    }</span>
+
+    /***
+     * Used for searching for an ingredient in the database
+     * @param ingredient ingredient to be searched
+     * @return search result (if search was successful or if there were any errors)
+     */
+    public void enterAnIngredient(String ingredient){
+
+<span class="fc" id="L55">        searchState = foodDB.enterAnIngredient(ingredient);</span>
+<span class="fc" id="L56">        notifyObservers();</span>
+<span class="fc" id="L57">    }</span>
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L63">            observer.update();</span>
+<span class="fc" id="L64">        }</span>
+
+        // reset
+<span class="fc" id="L67">        searchState = null;</span>
+<span class="fc" id="L68">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L72">        observerList.add(observer);</span>
+<span class="fc" id="L73">    }</span>
+
+    public String getSearchState() {
+<span class="fc" id="L76">        return searchState;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

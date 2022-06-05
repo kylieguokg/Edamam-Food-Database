@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">LoginState.java</span></div><h1>LoginState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages logging in and creating users
+ */
+public class LoginState implements Subject{
+
+    /***
+     * Current user logged in
+     */
+    private User currentUser;
+
+    /***
+     * Database storing users and saved foods
+     */
+    private FoodDB foodDB;
+
+    /***
+     * Whether if a user was successfully logged in
+     */
+<span class="fc" id="L25">    private boolean loginState = false;</span>
+
+    /***
+     * Whether if a user was successfully created or not
+     */
+<span class="fc" id="L30">    private boolean createUserState = false;</span>
+
+    /***
+     * List of observers who need to be updated if the login state is updated
+     */
+    private List&lt;Observer&gt; observerList;
+
+
+<span class="fc" id="L38">    public LoginState(FoodDB foodDB){</span>
+<span class="fc" id="L39">        this.foodDB = foodDB;</span>
+<span class="fc" id="L40">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+<span class="fc" id="L41">    }</span>
+
+    /***
+     * Attempts to log a user in with this username and password
+     * @param username
+     * @param password
+     */
+    public void login(String username, String password){
+
+<span class="fc" id="L50">        loginState = foodDB.login(username, password);</span>
+
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (loginState){</span>
+<span class="fc" id="L53">            currentUser = foodDB.getUser();</span>
+        }
+
+<span class="fc" id="L56">        notifyObservers();</span>
+<span class="fc" id="L57">    }</span>
+
+    /***
+     * Attempts to create a user in the database with this username and password
+     * @param username
+     * @param password
+     */
+    public void createUser(String username, String password){
+<span class="fc" id="L65">        createUserState = foodDB.createUser(username, password);</span>
+<span class="fc" id="L66">        notifyObservers();</span>
+<span class="fc" id="L67">    }</span>
+
+    /***
+     * Current user logged in
+     * @return current user logged in
+     */
+    public User getUser(){
+<span class="fc" id="L74">        return currentUser;</span>
+    }
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L81">            observer.update();</span>
+<span class="fc" id="L82">        }</span>
+
+        // reset
+<span class="fc" id="L85">        loginState = false;</span>
+<span class="fc" id="L86">        createUserState = false;</span>
+<span class="fc" id="L87">    }</span>
+
+    /***
+     * Whether if a user was successfully logged in
+     * @return if a user was successfully logged in
+     */
+    public boolean getLoggedIn(){
+<span class="fc" id="L94">        return loginState;</span>
+    }
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L99">        observerList.add(observer);</span>
+<span class="fc" id="L100">    }</span>
+
+    /***
+     * Whether if a user was successfully created or not
+     * @return if a user was successfully created
+     */
+    public boolean getCreatedUser() {
+<span class="fc" id="L107">        return createUserState;</span>
+    }
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc" id="L112">        observerList.remove(observer);</span>
+<span class="nc" id="L113">    }</span>
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

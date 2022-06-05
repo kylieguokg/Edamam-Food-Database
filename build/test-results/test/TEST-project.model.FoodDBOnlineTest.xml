@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="project.model.FoodDBOnlineTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2022-06-05T09:44:58" hostname="Kylies-MacBook-Pro.local" time="1.418">
+  <properties/>
+  <testcase name="loginValid()" classname="project.model.FoodDBOnlineTest" time="1.364"/>
+  <testcase name="selectAFoodCachedTest()" classname="project.model.FoodDBOnlineTest" time="0.003"/>
+  <testcase name="enterAnIngredientTest()" classname="project.model.FoodDBOnlineTest" time="0.016"/>
+  <testcase name="createUserExistsTest()" classname="project.model.FoodDBOnlineTest" time="0.006"/>
+  <testcase name="checkIfCachedVersionTrue()" classname="project.model.FoodDBOnlineTest" time="0.006"/>
+  <testcase name="checkIfCachedVersionFalse()" classname="project.model.FoodDBOnlineTest" time="0.004"/>
+  <testcase name="selectAFoodHTTPTest()" classname="project.model.FoodDBOnlineTest" time="0.005"/>
+  <testcase name="createUserDNETest()" classname="project.model.FoodDBOnlineTest" time="0.003"/>
+  <testcase name="loginInvalid()" classname="project.model.FoodDBOnlineTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

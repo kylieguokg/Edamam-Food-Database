@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Nutrients.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">Nutrients.java</span></div><h1>Nutrients.java</h1><pre class="source lang-java linenums">package project.model;
+
+/***
+ * Short version of nutrients for a food
+ */
+public class Nutrients {
+
+    /***
+     * Calories
+     */
+    private double ENERC_KCAL;
+
+    /***
+     * Protein
+     */
+    private double PROCNT;
+
+    /***
+     * Fat
+     */
+    private double FAT;
+
+    /***
+     * Carbohydrates (by difference)
+     */
+    private double CHOCDF;
+
+    /***
+     * Fibre
+     */
+    private double FIBTG;
+
+<span class="fc" id="L33">    public Nutrients(double enerc_kcal, double procnt, double fat, double chocdf, double fibtg) {</span>
+<span class="fc" id="L34">        ENERC_KCAL = enerc_kcal;</span>
+<span class="fc" id="L35">        PROCNT = procnt;</span>
+<span class="fc" id="L36">        FAT = fat;</span>
+<span class="fc" id="L37">        CHOCDF = chocdf;</span>
+<span class="fc" id="L38">        FIBTG = fibtg;</span>
+<span class="fc" id="L39">    }</span>
+
+    /***
+     * @return Calories
+     */
+    public double getENERC_KCAL() {
+<span class="fc" id="L45">        return ENERC_KCAL;</span>
+    }
+
+    public void setENERC_KCAL(int ENERC_KCAL) {
+<span class="nc" id="L49">        this.ENERC_KCAL = ENERC_KCAL;</span>
+<span class="nc" id="L50">    }</span>
+
+    /***
+     * @return Protein
+     */
+    public double getPROCNT() {
+<span class="fc" id="L56">        return PROCNT;</span>
+    }
+
+    public void setPROCNT(double PROCNT) {
+<span class="nc" id="L60">        this.PROCNT = PROCNT;</span>
+<span class="nc" id="L61">    }</span>
+
+    /***
+     * @return Fat
+     */
+    public double getFAT() {
+<span class="fc" id="L67">        return FAT;</span>
+    }
+
+    public void setFAT(double FAT) {
+<span class="nc" id="L71">        this.FAT = FAT;</span>
+<span class="nc" id="L72">    }</span>
+
+    /***
+     * @return Carbohydrates (by difference)
+     */
+    public double getCHOCDF() {
+<span class="fc" id="L78">        return CHOCDF;</span>
+    }
+
+    public void setCHOCDF(double CHOCDF) {
+<span class="nc" id="L82">        this.CHOCDF = CHOCDF;</span>
+<span class="nc" id="L83">    }</span>
+
+    /***
+     * @return Fibre
+     */
+    public double getFIBTG() {
+<span class="fc" id="L89">        return FIBTG;</span>
+    }
+
+    public void setFIBTG(int FIBTG) {
+<span class="nc" id="L93">        this.FIBTG = FIBTG;</span>
+<span class="nc" id="L94">    }</span>
+
+    public String toString(){
+<span class="fc" id="L97">        return &quot;Energy: &quot; + ENERC_KCAL + &quot; | Protein: &quot; + PROCNT +</span>
+                &quot;\nFat: &quot; + FAT + &quot; | Carbohydrate, by difference: &quot; + CHOCDF +
+                &quot;\nFibre, total dietary: &quot;  + FIBTG;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

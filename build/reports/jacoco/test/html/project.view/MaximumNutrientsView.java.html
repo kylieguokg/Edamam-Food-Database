@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaximumNutrientsView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">MaximumNutrientsView.java</span></div><h1>MaximumNutrientsView.java</h1><pre class="source lang-java linenums">package project.view;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.TreeItem;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.util.Callback;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
+import project.model.Nutrient;
+import javafx.beans.property.SimpleStringProperty;
+import project.presenter.MaximumNutrientsPresenter;
+import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
+import java.util.Map;
+
+
+
+/***
+ *   Displays the running total nutrition
+ *   information for a user's saved list of foods
+ */
+public class MaximumNutrientsView implements View {
+
+    private MainView mainView;
+    private BorderPane borderPane;
+    private ScrollPane scrollPane;
+    private Scene scene;
+
+    /***
+     * Stores all the visible nodes
+     */
+    private VBox mainBox;
+
+    /***
+     * Displays the totals of the nutrients and the maximum of the nutrients
+     */
+    private TreeTableView&lt;Nutrient&gt; nutrientsTable;
+
+    /***
+     * Displays a % stacked bar chart comparing each nutritional value
+     * against its set maximum
+     */
+    private StackedBarChart&lt;Number, String&gt; nutrientStringStackedBarChart;
+
+    /***
+     * Stores the nutrient names
+     */
+    private CategoryAxis categoryAxis;
+
+    /***
+     * Stores the percentages for each nutrient
+     */
+    private NumberAxis numberAxis;
+
+
+    private Label titleLBL;
+    private Label editLBL;
+
+
+    /***
+     * Manages the model logic for the total nutrients for the user's list of saved foods
+     */
+    private MaximumNutrientsPresenter maximumNutrientsPresenter;
+
+
+<span class="nc" id="L81">    public MaximumNutrientsView(MainView mainView){</span>
+<span class="nc" id="L82">        this.mainView = mainView;</span>
+
+<span class="nc" id="L84">        this.borderPane = new BorderPane();</span>
+<span class="nc" id="L85">        this.scene = new Scene(borderPane, 1400, 800);</span>
+<span class="nc" id="L86">        scene.getStylesheets().add(mainView.getStyleSheet());</span>
+
+<span class="nc" id="L88">        mainBox = new VBox(30);</span>
+<span class="nc" id="L89">        mainBox.getStyleClass().add(&quot;vbox&quot;);</span>
+<span class="nc" id="L90">        mainBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L92">        scrollPane = new ScrollPane();</span>
+<span class="nc" id="L93">        scrollPane.setContent(mainBox);</span>
+<span class="nc" id="L94">        scrollPane.setPadding(new Insets(0, 50, 50, 50));</span>
+<span class="nc" id="L95">        borderPane.setCenter(scrollPane);</span>
+<span class="nc" id="L96">        scrollPane.fitToWidthProperty().set(true);</span>
+
+<span class="nc" id="L98">        titleLBL = new Label(&quot;Nutrition Information for Saved Foods&quot;);</span>
+<span class="nc" id="L99">        titleLBL.setId(&quot;title&quot;);</span>
+<span class="nc" id="L100">        mainBox.getChildren().add(titleLBL);</span>
+
+<span class="nc" id="L102">        editLBL = new Label(&quot;Click on the cell to edit the maximum quantity&quot;);</span>
+<span class="nc" id="L103">        mainBox.getChildren().add(editLBL);</span>
+
+<span class="nc" id="L105">        nutrientsTable = new TreeTableView&lt;Nutrient&gt;();</span>
+<span class="nc" id="L106">        mainBox.getChildren().add(nutrientsTable);</span>
+
+        // y axis has the nutrient names
+<span class="nc" id="L109">        categoryAxis = new CategoryAxis();</span>
+<span class="nc" id="L110">        categoryAxis.setLabel(&quot;Nutrients&quot;);</span>
+
+        // x axis has the quantities as a %
+<span class="nc" id="L113">        numberAxis = new NumberAxis();</span>
+<span class="nc" id="L114">        numberAxis.setLabel(&quot;Quantities (%)&quot;);</span>
+
+<span class="nc" id="L116">        nutrientStringStackedBarChart = new StackedBarChart&lt;Number, String&gt;(numberAxis, categoryAxis);</span>
+<span class="nc" id="L117">        mainBox.getChildren().add(nutrientStringStackedBarChart);</span>
+
+<span class="nc" id="L119">        setUpTopBox();</span>
+
+<span class="nc" id="L121">    }</span>
+
+    @Override
+    public Scene getScene(){
+<span class="nc" id="L125">        return scene;</span>
+    }
+
+    /***
+     * Sets up the main elements of the view
+     */
+    public void setUp(MaximumNutrientsPresenter maximumNutrientsPresenter){
+
+<span class="nc" id="L133">        this.maximumNutrientsPresenter = maximumNutrientsPresenter;</span>
+
+<span class="nc" id="L135">        setUpNutrientsTable();</span>
+<span class="nc" id="L136">        showNutrientsTable();</span>
+
+<span class="nc" id="L138">        setUpStackedBarChart();</span>
+<span class="nc" id="L139">        showStackedBarChart();</span>
+
+<span class="nc" id="L141">    }</span>
+
+
+    /***
+     * Sets up the top navigation bar
+     */
+    public void setUpTopBox(){
+<span class="nc" id="L148">        mainView.setUpTopBox();</span>
+<span class="nc" id="L149">        borderPane.setTop(mainView.getTopSP());</span>
+<span class="nc" id="L150">    }</span>
+
+
+    /***
+     * Sets up a % stacked bar chart comparing each nutritional value
+     * against its set maximum
+     */
+    public void setUpStackedBarChart(){
+
+<span class="nc" id="L159">        nutrientStringStackedBarChart.setTitle(&quot;Total Quantity out of Maximum Quantity (%)&quot;);</span>
+<span class="nc" id="L160">        nutrientStringStackedBarChart.setMinSize(1000, 800);</span>
+<span class="nc" id="L161">        nutrientStringStackedBarChart.setLegendVisible(false);</span>
+
+<span class="nc" id="L163">    }</span>
+
+    /***
+     * Sets up the data for stacked bar chart of quantitiyes
+     */
+    public void showStackedBarChart(){
+
+        // clear data first
+<span class="nc" id="L171">        nutrientStringStackedBarChart.getData().clear();</span>
+
+        // Sections for each bar
+<span class="nc" id="L174">        XYChart.Series&lt;Number, String&gt; quantitySeries = new XYChart.Series&lt;&gt;();</span>
+<span class="nc" id="L175">        quantitySeries.setName(&quot;Quantity&quot;);</span>
+
+<span class="nc" id="L177">        XYChart.Series&lt;Number, String&gt; maxQuantitySeries = new XYChart.Series&lt;&gt;();</span>
+<span class="nc" id="L178">        maxQuantitySeries.setName(&quot;Maximum Quantity&quot;);</span>
+
+<span class="nc" id="L180">        nutrientStringStackedBarChart.getData().add(quantitySeries);</span>
+<span class="nc" id="L181">        nutrientStringStackedBarChart.getData().add(maxQuantitySeries);</span>
+
+<span class="nc" id="L183">        maximumNutrientsPresenter.setUpStackedBarChart();</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        for (String nutrient: maximumNutrientsPresenter.getQuantityPercents().keySet()){</span>
+
+<span class="nc" id="L187">            Double percent = maximumNutrientsPresenter.getQuantityPercents().get(nutrient);</span>
+<span class="nc" id="L188">            Double maxPercent = maximumNutrientsPresenter.getMaxQuantityPercents().get(nutrient);</span>
+
+<span class="nc" id="L190">            quantitySeries.getData().add(new XYChart.Data&lt;Number, String&gt;(percent, nutrient));</span>
+<span class="nc" id="L191">            maxQuantitySeries.getData().add(new XYChart.Data&lt;Number, String&gt;(maxPercent, nutrient));</span>
+<span class="nc" id="L192">        }</span>
+
+<span class="nc" id="L194">    }</span>
+
+
+    /***
+     * Sets up a table to store the totals of the nutrients
+     * and the maximum of the nutrients
+     */
+    public void setUpNutrientsTable(){
+
+<span class="nc" id="L203">        nutrientsTable.setEditable(true);</span>
+<span class="nc" id="L204">        nutrientsTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);</span>
+
+        // Stores the nutrient name
+<span class="nc" id="L207">        TreeTableColumn&lt;Nutrient, String&gt; col0 = new TreeTableColumn&lt;&gt;(&quot;Nutrient&quot;);</span>
+<span class="nc" id="L208">        nutrientsTable.getColumns().add(col0);</span>
+<span class="nc" id="L209">        col0.setMaxWidth(7000);</span>
+<span class="nc" id="L210">        col0.setEditable(false);</span>
+<span class="nc" id="L211">        col0.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L212">        col0.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt; n) {
+
+<span class="nc" id="L216">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L217">                return new SimpleStringProperty(maximumNutrientsPresenter.formatNutrientSTR(nutrient));</span>
+
+            }
+        });
+
+        // Stores the running total quantity of a nutrient
+<span class="nc" id="L223">        TreeTableColumn&lt;Nutrient, String&gt; col1 = new TreeTableColumn&lt;&gt;(&quot;Total Quantity&quot;);</span>
+<span class="nc" id="L224">        nutrientsTable.getColumns().add(col1);</span>
+<span class="nc" id="L225">        col1.setMaxWidth(7000);</span>
+<span class="nc" id="L226">        col1.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L227">        col1.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L228">        col1.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt; n) {
+
+<span class="nc" id="L232">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L233">                return new SimpleStringProperty(maximumNutrientsPresenter.formatRunningTotalSTR(nutrient));</span>
+            }
+        });
+
+
+        // Stores the total daily quantity (%) of a nutrient
+<span class="nc" id="L239">        TreeTableColumn&lt;Nutrient, String&gt; col2 = new TreeTableColumn&lt;&gt;(&quot;Total Daily Quantity (%)&quot;);</span>
+<span class="nc" id="L240">        nutrientsTable.getColumns().add(col2);</span>
+<span class="nc" id="L241">        col2.setMaxWidth(7000);</span>
+<span class="nc" id="L242">        col2.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L243">        col2.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L244">        col2.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt; n) {
+
+<span class="nc" id="L248">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L249">                return new SimpleStringProperty(maximumNutrientsPresenter.formatRunningTotalDailySTR(nutrient));</span>
+            }
+        });
+
+        // Stores the maximum quantity of a nutrient (and is editable)
+<span class="nc" id="L254">        TreeTableColumn&lt;Nutrient, String&gt; col3 = new TreeTableColumn&lt;&gt;(&quot;Maximum Quantity&quot;);</span>
+<span class="nc" id="L255">        nutrientsTable.getColumns().add(col3);</span>
+<span class="nc" id="L256">        col3.setMaxWidth(7000);</span>
+<span class="nc" id="L257">        col3.setEditable(true);</span>
+<span class="nc" id="L258">        col3.getStyleClass().add(&quot;column-border&quot;);</span>
+<span class="nc" id="L259">        col3.setId(&quot;right-aligned&quot;);</span>
+<span class="nc" id="L260">        col3.setCellValueFactory(new Callback&lt;TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt;, ObservableValue&lt;String&gt;&gt;() {</span>
+            @Override
+            public ObservableValue&lt;String&gt; call(TreeTableColumn.CellDataFeatures&lt;Nutrient,String&gt; n) {
+
+<span class="nc" id="L264">                Nutrient nutrient = n.getValue().getValue();</span>
+<span class="nc" id="L265">                return new SimpleStringProperty(maximumNutrientsPresenter.formatMaximumSTR(nutrient));</span>
+
+            }
+        });
+<span class="nc" id="L269">        col3.setCellFactory(TextFieldTreeTableCell.&lt;Nutrient&gt;forTreeTableColumn()); // makes it editable</span>
+<span class="nc" id="L270">        col3.setOnEditCommit( e -&gt; {</span>
+
+<span class="nc" id="L272">            Nutrient nutrient = (Nutrient) e.getRowValue().getValue();</span>
+<span class="nc" id="L273">            String quantity = (String) e.getNewValue();</span>
+<span class="nc" id="L274">            maximumNutrientsPresenter.changeQuantity(nutrient, quantity);</span>
+<span class="nc" id="L275">        });</span>
+<span class="nc" id="L276">    }</span>
+
+
+    /***
+     * Populates nutrients table with formatted data about maximum total nutrients
+     */
+    public void showNutrientsTable(){
+
+        // Store all the nutrients
+<span class="nc" id="L285">        Map&lt;String, Nutrient&gt; nutrientMap = maximumNutrientsPresenter.getMaxTotalNutrientsList();</span>
+
+        // Subcategory - Fat
+<span class="nc" id="L288">        TreeItem&lt;Nutrient&gt; fat = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;fats&quot;, &quot;Fats&quot;));</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        for (String fatStr: maximumNutrientsPresenter.getFatStrings()){</span>
+<span class="nc" id="L290">            fat.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(fatStr)));</span>
+<span class="nc" id="L291">        }</span>
+
+        // Subcategory - Carbs
+<span class="nc" id="L294">        TreeItem&lt;Nutrient&gt; carbs = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;carbs&quot;, &quot;Carbs&quot;));</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        for (String carb: maximumNutrientsPresenter.getCarbStrings()){</span>
+<span class="nc" id="L296">            carbs.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(carb)));</span>
+<span class="nc" id="L297">        }</span>
+
+        // Overall category
+<span class="nc" id="L300">        TreeItem&lt;Nutrient&gt; nutrients = new TreeItem&lt;Nutrient&gt;(new Nutrient(&quot;nutrients&quot;, &quot;Nutrients&quot;));</span>
+<span class="nc" id="L301">        nutrients.setExpanded(true);</span>
+<span class="nc" id="L302">        nutrients.getChildren().add(fat);</span>
+<span class="nc" id="L303">        nutrients.getChildren().add(carbs);</span>
+
+        // Add the other nutrient types
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        for (String nutrient: nutrientMap.keySet() ){</span>
+
+<span class="nc bnc" id="L308" title="All 4 branches missed.">            if (maximumNutrientsPresenter.getCarbStrings().contains(nutrient) || maximumNutrientsPresenter.getFatStrings().contains(nutrient)){</span>
+<span class="nc" id="L309">                continue;</span>
+            }
+<span class="nc" id="L311">            nutrients.getChildren().add(new TreeItem&lt;Nutrient&gt;(nutrientMap.get(nutrient)));</span>
+<span class="nc" id="L312">        }</span>
+
+<span class="nc" id="L314">        nutrientsTable.setRoot(nutrients);</span>
+
+<span class="nc" id="L316">    }</span>
+
+
+
+    /***
+     * Refreshes the table
+     */
+    public void refreshTable(){
+
+<span class="nc" id="L325">        nutrientsTable.refresh();</span>
+<span class="nc" id="L326">        showNutrientsTable();</span>
+
+<span class="nc" id="L328">    }</span>
+
+
+    @Override
+    public void openSettings(VBox settingsMenu){
+<span class="nc" id="L333">        borderPane.setRight(settingsMenu);</span>
+<span class="nc" id="L334">    }</span>
+
+
+    @Override
+    public void closeSettings(VBox settingsMenu){
+<span class="nc" id="L339">        borderPane.setRight(null);</span>
+<span class="nc" id="L340">    }</span>
+
+
+    @Override
+    public void setColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                           String tableColour, String quantityColour,
+                           String maxQuantityColour){
+
+        // table colours
+<span class="nc" id="L349">        nutrientsTable.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L350">        nutrientsTable.lookup(&quot;.column-header-background &quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L351">        nutrientsTable.lookup(&quot;.column-header-background .filler&quot;).setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+
+<span class="nc" id="L353">        nutrientsTable.lookupAll(&quot;.tree-table-view .column-header&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L355">            node.setStyle(&quot;-fx-background-color: &quot; + tableColour);</span>
+<span class="nc" id="L356">        });</span>
+
+<span class="nc" id="L358">        nutrientsTable.lookupAll(&quot;.column-border&quot;).stream().forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L360">            node.setStyle(&quot;-fx-border-color: &quot; + tableColour);</span>
+<span class="nc" id="L361">        });</span>
+
+<span class="nc" id="L363">        nutrientsTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L365">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour);</span>
+<span class="nc" id="L366">        });</span>
+
+<span class="nc" id="L368">        nutrientsTable.lookupAll(&quot;.label&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L370">            node.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L371">        });</span>
+
+<span class="nc" id="L373">        nutrientsTable.getColumns().stream().forEach((column) -&gt;</span>
+        {
+<span class="nc" id="L375">            column.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L376">        });</span>
+
+<span class="nc" id="L378">        nutrientsTable.lookupAll(&quot;.tree-table-column&quot;).forEach((node) -&gt;</span>
+        {
+<span class="nc" id="L380">            node.setStyle(&quot;-fx-border-color: &quot;+ tableColour + &quot;;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L381">        });</span>
+
+        // Text colours
+<span class="nc" id="L384">        titleLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L385">        editLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+<span class="nc" id="L387">        categoryAxis.setStyle(&quot;-fx-tick-label-fill: &quot; + textColour);</span>
+<span class="nc" id="L388">        categoryAxis.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L389">        numberAxis.setStyle(&quot;-fx-tick-label-fill: &quot; + textColour);</span>
+<span class="nc" id="L390">        numberAxis.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+<span class="nc" id="L392">        nutrientStringStackedBarChart.lookup(&quot;.chart-title&quot;).setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L393">        nutrientStringStackedBarChart.lookupAll(&quot;.axis&quot;).forEach((axis) -&gt; {</span>
+<span class="nc" id="L394">            axis.setStyle(&quot;-fx-tick-label-fill:  &quot; + textColour);</span>
+<span class="nc" id="L395">        });</span>
+<span class="nc" id="L396">        nutrientStringStackedBarChart.lookupAll(&quot;.axis .label&quot;).forEach((axis) -&gt; {</span>
+<span class="nc" id="L397">            axis.setStyle(&quot;-fx-text-fill:  &quot; + textColour);</span>
+<span class="nc" id="L398">        });</span>
+
+        // quantity and max quantity colour
+<span class="nc bnc" id="L401" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++){</span>
+
+            // even - set quantity colour
+<span class="nc bnc" id="L404" title="All 2 branches missed.">            if (i % 2 == 0){</span>
+<span class="nc" id="L405">                nutrientStringStackedBarChart.lookupAll(&quot;.default-color&quot; + i + &quot;.chart-bar&quot;).forEach((node) -&gt; {</span>
+<span class="nc" id="L406">                    node.setStyle(&quot;-fx-bar-fill:&quot; + quantityColour);</span>
+<span class="nc" id="L407">                });</span>
+            } else {
+                // odd  - set max quantity colour
+<span class="nc" id="L410">                nutrientStringStackedBarChart.lookupAll(&quot;.default-color&quot; + i + &quot;.chart-bar&quot;).forEach((node) -&gt; {</span>
+<span class="nc" id="L411">                    node.setStyle(&quot;-fx-bar-fill:&quot; + maxQuantityColour);</span>
+<span class="nc" id="L412">                });</span>
+            }
+
+        }
+
+<span class="nc" id="L417">        scene.setFill(Paint.valueOf(backgroundColour));</span>
+
+<span class="nc" id="L419">        nutrientsTable.refresh();</span>
+
+<span class="nc" id="L421">    }</span>
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TotalNutrients.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">TotalNutrients.java</span></div><h1>TotalNutrients.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.*;
+
+
+/*
+    Stores the long form of the specific nutrients of a food
+ */
+public class TotalNutrients {
+
+<span class="fc" id="L11">    private Map&lt;String, Nutrient&gt; nutrients = new LinkedHashMap&lt;String, Nutrient&gt;();</span>
+<span class="fc" id="L12">    private boolean arePercentages = false;</span>
+
+    // Each of the 35 nutrients from EDANAM
+<span class="fc" id="L15">    public TotalNutrients(){</span>
+<span class="fc" id="L16">        nutrients.put(&quot;ENERC_KCAL&quot;, new Nutrient(&quot;ENERC_KCAL&quot;, &quot;Energy&quot;, 0.0, &quot;kcal&quot; ));</span>
+<span class="fc" id="L17">        nutrients.put(&quot;FAT&quot;, new Nutrient(&quot;FAT&quot;, &quot;Fat&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L18">        nutrients.put(&quot;FASAT&quot;, new Nutrient(&quot;FASAT&quot;,&quot;Saturated&quot; , 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L19">        nutrients.put(&quot;FATRN&quot;, new Nutrient(&quot;FATRN&quot;, &quot;Trans&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L20">        nutrients.put(&quot;FAMS&quot;, new Nutrient(&quot;FAMS&quot;, &quot;Monounsaturated&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L21">        nutrients.put(&quot;FAPU&quot;, new Nutrient(&quot;FAPU&quot;,&quot;Polyunsaturated&quot; , 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L22">        nutrients.put(&quot;CHOCDF&quot;, new Nutrient(&quot;CHOCDF&quot;, &quot;Carbohydrate, by difference&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L23">        nutrients.put(&quot;FIBTG&quot;, new Nutrient(&quot;FIBTG&quot;, &quot;Fibre&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L24">        nutrients.put(&quot;SUGAR&quot;, new Nutrient(&quot;SUGAR&quot;, &quot;Sugars&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L25">        nutrients.put(&quot;PROCNT&quot;, new Nutrient(&quot;PROCNT&quot;, &quot;Protein&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L26">        nutrients.put(&quot;CHOLE&quot;, new Nutrient(&quot;CHOLE&quot;, &quot;Cholesterol&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L27">        nutrients.put(&quot;NA&quot;, new Nutrient(&quot;NA&quot;, &quot;Sodium&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L28">        nutrients.put(&quot;CA&quot;, new Nutrient(&quot;CA&quot;, &quot;Calcium&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L29">        nutrients.put(&quot;MG&quot;, new Nutrient(&quot;MG&quot;, &quot;Magnesium&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L30">        nutrients.put(&quot;K&quot;, new Nutrient(&quot;K&quot;, &quot;Potassium&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L31">        nutrients.put(&quot;FE&quot;, new Nutrient(&quot;FE&quot;, &quot;Iron&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L32">        nutrients.put(&quot;ZN&quot;, new Nutrient(&quot;ZN&quot;, &quot;Zinc&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L33">        nutrients.put(&quot;P&quot;, new Nutrient(&quot;P&quot;, &quot;Phosphorus&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L34">        nutrients.put(&quot;VITA_RAE&quot;, new Nutrient(&quot;VITA_RAE&quot;, &quot;Vitamin A&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L35">        nutrients.put(&quot;VITC&quot;, new Nutrient(&quot;VITC&quot;, &quot;Vitamin C&quot;,0.0,&quot;µg&quot; ));</span>
+<span class="fc" id="L36">        nutrients.put(&quot;THIA&quot;, new Nutrient(&quot;THIA&quot;,&quot;Thiamin&quot; , 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L37">        nutrients.put(&quot;RIBF&quot;, new Nutrient(&quot;RIBF&quot;,&quot;Riboflavin&quot; , 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L38">        nutrients.put(&quot;NIA&quot;, new Nutrient(&quot;NIA&quot;, &quot;Niacin&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L39">        nutrients.put(&quot;VITB6A&quot;, new Nutrient(&quot;VITB6A&quot;, &quot;Vitamin B-6&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L40">        nutrients.put(&quot;FOLDFE&quot;, new Nutrient(&quot;FOLDFE&quot;, &quot;Folate, DFE&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L41">        nutrients.put(&quot;FOLFD&quot;, new Nutrient(&quot;FOLFD&quot;,  &quot;Folate, food&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L42">        nutrients.put(&quot;FOLAC&quot;, new Nutrient(&quot;FOLAC&quot;, &quot;Folic acid&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L43">        nutrients.put(&quot;VITB12&quot;, new Nutrient(&quot;VITB12&quot;, &quot;Vitamin B-12&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L44">        nutrients.put(&quot;VITD&quot;, new Nutrient(&quot;VITD&quot;,&quot;Vitamin D (D2 + D3)&quot;, 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L45">        nutrients.put(&quot;TOCPHA&quot;, new Nutrient(&quot;TOCPHA&quot;, &quot;Vitamin E (alpha-tocopherol)&quot;, 0.0, &quot;mg&quot;));</span>
+<span class="fc" id="L46">        nutrients.put(&quot;VITK1&quot;, new Nutrient(&quot;VITK1&quot;,&quot;Vitamin K (phylloquinone)&quot; , 0.0, &quot;µg&quot;));</span>
+<span class="fc" id="L47">        nutrients.put(&quot;WATER&quot;, new Nutrient(&quot;WATER&quot;, &quot;Water&quot;, 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L48">        nutrients.put(&quot;SUGAR.added&quot;, new Nutrient(&quot;SUGAR.added&quot;, &quot;Sugar added&quot;, 0.0, &quot;g&quot; ));</span>
+<span class="fc" id="L49">        nutrients.put(&quot;CHOCDF.net&quot;, new Nutrient(&quot;CHOCDF.net&quot;, &quot;Carbohydrate (net)&quot; , 0.0, &quot;g&quot;));</span>
+<span class="fc" id="L50">        nutrients.put(&quot;Sugar.alcohol&quot;, new Nutrient(&quot;Sugar.alcohol&quot;, &quot;Sugar alcohols&quot;, 0.0, &quot;g&quot;));</span>
+
+<span class="fc" id="L52">    }</span>
+
+    /*
+        Sets the quantities of all the nutrients to the same value
+        @param quantity    quantity to be set for each nutrient
+     */
+    public void setQuantities(Double quantity){
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (Nutrient nutrient: nutrients.values()){</span>
+<span class="fc" id="L61">            nutrient.setQuantity(quantity);</span>
+<span class="fc" id="L62">        }</span>
+<span class="fc" id="L63">    }</span>
+
+    /*
+    * Sets the units of all the nutrients to the same value
+    *  @param unit    unit to be set for each nutrient
+    */
+    public void setUnits(String unit){
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (unit.equals(&quot;%&quot;)){</span>
+<span class="fc" id="L72">            arePercentages = true;</span>
+        }
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (Nutrient nutrient: nutrients.values()){</span>
+<span class="fc" id="L76">            nutrient.setUnit(unit);</span>
+<span class="fc" id="L77">        }</span>
+<span class="fc" id="L78">    }</span>
+
+    public String arePercentages(){
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (arePercentages){</span>
+<span class="nc" id="L82">            return &quot;TRUE&quot;;</span>
+        }
+<span class="nc" id="L84">        return &quot;FALSE&quot;;</span>
+    }
+
+    public List&lt;Nutrient&gt; getNutrients(){
+<span class="nc" id="L88">        return nutrients.values().stream().toList();</span>
+    }
+
+    /***
+     * Return list of nutrient names
+     * @return list of nutrient names
+     */
+    public List&lt;String&gt; getNutrientStrings(){
+<span class="nc" id="L96">        return nutrients.keySet().stream().toList();</span>
+    }
+
+    public Map&lt;String, Nutrient&gt; getNutrientList() {
+<span class="fc" id="L100">        return nutrients;</span>
+    }
+
+    /***
+     * Add a nutrient to map of nutrient names to Nutrient objects
+     * @param nutrientString nutrient name
+     * @param nutrient nutrient object to add to map
+     */
+    public void addNutrient(String nutrientString, Nutrient nutrient) {
+<span class="fc" id="L109">        nutrients.put(nutrientString, nutrient);</span>
+<span class="fc" id="L110">    }</span>
+
+
+    /***
+     * Copies each of the nutrient in a list and returns a copy of the totalnutrients
+     * @return copy of total nutrients
+     */
+    public TotalNutrients copy(){
+
+<span class="fc" id="L119">        TotalNutrients copy = new TotalNutrients();</span>
+
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        for (String nutrientStr: nutrients.keySet()){</span>
+<span class="fc" id="L122">            Nutrient srcNutrient = nutrients.get(nutrientStr);</span>
+<span class="fc" id="L123">            copy.getNutrientList().get(nutrientStr).setQuantity(srcNutrient.getQuantity());</span>
+<span class="fc" id="L124">            copy.getNutrientList().get(nutrientStr).setUnit(srcNutrient.getUnit());</span>
+<span class="fc" id="L125">        }</span>
+
+<span class="fc" id="L127">        return copy;</span>
+    }
+
+    public void setQuantity(String nutrient, double quantity){
+<span class="fc" id="L131">        nutrients.get(nutrient).setQuantity(quantity);</span>
+<span class="fc" id="L132">    }</span>
+
+    public void addToQuantity(String nutrient, double quantity){
+<span class="fc" id="L135">        nutrients.get(nutrient).addToQuantity(quantity);</span>
+<span class="fc" id="L136">    }</span>
+
+
+    /***
+     * Gets quantity of a nutrient
+     * @param nutrient nutrient to get quantity for
+     * @return quantity of nutrient
+     */
+    public Double getQuantity(String nutrient){
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (nutrients.get(nutrient) == null){</span>
+<span class="nc" id="L146">            return null;</span>
+        }
+<span class="fc" id="L148">        return nutrients.get(nutrient).getQuantity();</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodDBJsonParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">FoodDBJsonParser.java</span></div><h1>FoodDBJsonParser.java</h1><pre class="source lang-java linenums">package project.model;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+/***
+ * Helper class to convert Json results from
+ * HTTP and the database into POJOs
+ */
+<span class="fc" id="L16">public class FoodDBJsonParser {</span>
+
+<span class="fc" id="L18">    static Gson gson = new Gson();</span>
+
+    private List&lt;Food&gt; searchResults;
+
+
+    /***
+     * Converts a JsonElement storing search results into a list of foods
+     * @param foodJE stores search results from Edanam
+     */
+    public String enterAnIngredient(String in){
+
+<span class="fc" id="L29">        JsonElement foodJE = gson.fromJson(in, JsonElement.class);</span>
+
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (foodJE.getAsJsonObject().get(&quot;HTTPError&quot;) != null){</span>
+
+<span class="fc" id="L33">            return foodJE.getAsJsonObject().get(&quot;HTTPError&quot;).getAsString();</span>
+        }
+
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (foodJE.getAsJsonObject().get(&quot;error&quot;) != null){</span>
+
+<span class="fc" id="L38">            String errorMsg = foodJE.getAsJsonObject().get(&quot;message&quot;).getAsString();</span>
+<span class="fc" id="L39">            return &quot;ERROR: &quot; + errorMsg;</span>
+        }
+
+<span class="fc" id="L42">        JsonArray foodArray = foodJE.getAsJsonObject().get(&quot;hints&quot;).getAsJsonArray();</span>
+
+<span class="fc" id="L44">        int i = 0;</span>
+
+<span class="fc" id="L46">        searchResults = new ArrayList&lt;Food&gt;();</span>
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (foodArray.size() == 0){</span>
+<span class="fc" id="L49">            return &quot;ERROR: No results&quot;;</span>
+        }
+
+
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        while (i &lt; foodArray.size()){</span>
+
+<span class="fc" id="L55">            JsonObject curFood = foodArray.get(i).getAsJsonObject();</span>
+<span class="fc" id="L56">            Food food = gson.fromJson(curFood.get(&quot;food&quot;), Food.class);</span>
+
+<span class="fc" id="L58">            JsonArray measureJA = curFood.get(&quot;measures&quot;).getAsJsonArray();</span>
+
+<span class="fc" id="L60">            int j = 0;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">            while (j &lt; measureJA.size()){</span>
+<span class="fc" id="L62">                food.addMeasure(gson.fromJson(measureJA.get(j).getAsJsonObject(), Measure.class));</span>
+<span class="fc" id="L63">                j += 1;</span>
+            }
+
+<span class="fc" id="L66">            i += 1;</span>
+<span class="fc" id="L67">            searchResults.add(food);</span>
+<span class="fc" id="L68">        }</span>
+
+<span class="fc" id="L70">        return &quot;ok&quot;;</span>
+
+    }
+
+    /***
+     * Adds data from JsonElement storing data regarding the total nutritional value of a food to a Food POJO
+     * @param foodJE stores data from Edanam
+     * @param selectedFood food to store the total nutritional value information in
+     */
+    public String selectAFood(String in,
+                              Food selectedFood){
+
+<span class="fc" id="L82">        JsonElement foodJE = gson.fromJson(in, JsonElement.class);</span>
+
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (foodJE.getAsJsonObject().get(&quot;HTTPError&quot;) != null){</span>
+
+<span class="fc" id="L86">            return foodJE.getAsJsonObject().get(&quot;HTTPError&quot;).getAsString();</span>
+        }
+
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (foodJE.getAsJsonObject().get(&quot;error&quot;) != null){</span>
+
+<span class="fc" id="L91">            String errorMsg = foodJE.getAsJsonObject().get(&quot;message&quot;).getAsString();</span>
+<span class="fc" id="L92">            return &quot;ERROR: &quot; + errorMsg;</span>
+
+        }
+
+<span class="fc" id="L96">        selectedFood.setCalories(foodJE.getAsJsonObject().get(&quot;calories&quot;).getAsDouble());</span>
+<span class="fc" id="L97">        selectedFood.setTotalWeight(foodJE.getAsJsonObject().get(&quot;totalWeight&quot;).getAsDouble());</span>
+
+        // Get diet labels
+
+<span class="fc" id="L101">        List&lt;String&gt; dietLabels = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L103">        JsonArray dietLabelsArray = foodJE.getAsJsonObject().get(&quot;dietLabels&quot;).getAsJsonArray();</span>
+
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        for (int i = 0; i &lt; dietLabelsArray.size(); i++){</span>
+<span class="nc" id="L106">            dietLabels.add(dietLabelsArray.get(i).getAsString());</span>
+        }
+
+<span class="fc" id="L109">        selectedFood.setDietLabels(dietLabels);</span>
+
+        // Get health labels
+
+<span class="fc" id="L113">        List&lt;String&gt; healthLabels = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L115">        JsonArray healthLabelsArray = foodJE.getAsJsonObject().get(&quot;healthLabels&quot;).getAsJsonArray();</span>
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        for (int i = 0; i &lt; healthLabelsArray.size(); i++){</span>
+<span class="fc" id="L118">            healthLabels.add(healthLabelsArray.get(i).getAsString());</span>
+        }
+
+<span class="fc" id="L121">        selectedFood.setHealthLabels(healthLabels);</span>
+
+        // Get cautions
+
+<span class="fc" id="L125">        List&lt;String&gt; cautions = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L127">        JsonArray cautionsArray = foodJE.getAsJsonObject().get(&quot;cautions&quot;).getAsJsonArray();</span>
+
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        for (int i = 0; i &lt; cautionsArray.size(); i++){</span>
+<span class="nc" id="L130">            cautions.add(cautionsArray.get(i).getAsString());</span>
+        }
+
+<span class="fc" id="L133">        selectedFood.setCautions(cautions);</span>
+
+
+        // get total nutrients
+
+<span class="fc" id="L138">        TotalNutrients totalNutrients = new TotalNutrients();</span>
+
+<span class="fc" id="L140">        JsonObject nutrientArray = foodJE.getAsJsonObject().get(&quot;totalNutrients&quot;).getAsJsonObject();</span>
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for (String curNutrientString : totalNutrients.getNutrientList().keySet()){</span>
+
+<span class="fc" id="L144">            Nutrient nutrient = gson.fromJson(nutrientArray.get(curNutrientString), Nutrient.class);</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            if (nutrient == null){</span>
+<span class="fc" id="L147">                continue;</span>
+            }
+
+<span class="fc" id="L150">            nutrient.setNutrient(curNutrientString);</span>
+
+<span class="fc" id="L152">            totalNutrients.addNutrient(curNutrientString, nutrient);</span>
+
+<span class="fc" id="L154">        }</span>
+
+<span class="fc" id="L156">        selectedFood.setTotalNutrients(totalNutrients);</span>
+
+
+        // get total daily nutrients
+
+<span class="fc" id="L161">        TotalNutrients totalDaily = new TotalNutrients();</span>
+<span class="fc" id="L162">        totalDaily.setUnits(&quot;%&quot;);</span>
+
+<span class="fc" id="L164">        JsonObject dailyArray = foodJE.getAsJsonObject().get(&quot;totalDaily&quot;).getAsJsonObject();</span>
+
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        for (String curNutrientString : totalDaily.getNutrientList().keySet()){</span>
+
+<span class="fc" id="L168">            Nutrient nutrient = gson.fromJson(dailyArray.get(curNutrientString), Nutrient.class);</span>
+
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (nutrient == null){</span>
+<span class="fc" id="L171">                continue;</span>
+            }
+
+<span class="fc" id="L174">            nutrient.setNutrient(curNutrientString);</span>
+
+<span class="fc" id="L176">            totalDaily.addNutrient(curNutrientString, nutrient);</span>
+
+<span class="fc" id="L178">        }</span>
+
+<span class="fc" id="L180">        selectedFood.setTotalDaily(totalDaily);</span>
+
+<span class="fc" id="L182">        return &quot;ok&quot;;</span>
+    }
+
+
+    /***
+     * Creates a food object from Json results
+     * @param in Json results from database
+     * @return Food POJO
+     */
+    public Food getFood(List&lt;String&gt; in){
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (in.size() == 1){</span>
+<span class="fc" id="L193">            return gson.fromJson(in.get(0), Food.class);</span>
+        }
+<span class="fc" id="L195">        return null;</span>
+    }
+
+    /***
+     * Creates a User object from Json results
+     * @param in Json results from database
+     * @return User pojo
+     */
+    public User getUser(List&lt;String&gt; in){
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (in.size() == 1){</span>
+<span class="fc" id="L205">            return gson.fromJson(in.get(0), User.class);</span>
+        }
+<span class="fc" id="L207">        return null;</span>
+    }
+
+    /***
+     * Creates a list of Food POJOs from a list of Json strings from database
+     * @param in list of saved foods as a list of json strings
+     * @return List of saved foods as a list of Food POJOs
+     */
+    public List&lt;Food&gt; getSavedFoods(List&lt;String&gt; in){
+
+<span class="fc" id="L217">        List&lt;Food&gt; savedFoods = new ArrayList&lt;Food&gt;();</span>
+
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        for (int i = 0; i &lt; in.size(); i++){</span>
+<span class="fc" id="L220">            savedFoods.add(gson.fromJson(in.get(i), Food.class));</span>
+        }
+
+<span class="fc" id="L223">        return savedFoods;</span>
+    }
+
+    /***
+     * Returns the search results for a search for a food
+     * @return search results of food
+     */
+    public List&lt;Food&gt; getSearchResults(){
+<span class="fc" id="L231">        return searchResults;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

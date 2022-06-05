@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SavedFoodPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.presenter</a> &gt; <span class="el_source">SavedFoodPresenter.java</span></div><h1>SavedFoodPresenter.java</h1><pre class="source lang-java linenums">package project.presenter;
+
+import project.model.Food;
+import project.model.Observer;
+import project.model.SavedFoodState;
+import project.view.SavedFoodsView;
+
+import java.text.DecimalFormat;
+
+import java.util.List;
+
+/***
+ * Responsible for mutating the Saved Foods View and Saved Foods state
+ */
+public class SavedFoodPresenter implements Presenter, Observer {
+
+    /***
+     * Manages the storing of saved foods of user
+     */
+    private SavedFoodState savedFoodState;
+
+    /***
+     * View displaying the list of saved foods for user
+     */
+    private SavedFoodsView savedFoodsView;
+
+
+    private DecimalFormat decimalFormat;
+
+<span class="nc" id="L30">    public SavedFoodPresenter(SavedFoodState savedFoodState, SavedFoodsView currentView) {</span>
+
+<span class="nc" id="L32">        this.savedFoodState = savedFoodState;</span>
+<span class="nc" id="L33">        this.savedFoodsView = currentView;</span>
+
+<span class="nc" id="L35">        String pattern = &quot;##.##&quot;;</span>
+<span class="nc" id="L36">        decimalFormat = new DecimalFormat(pattern);</span>
+
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void update(){
+
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void unsubscribePresenter(){
+<span class="nc" id="L47">        savedFoodState.unsubscribe(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    public List&lt;Food&gt; getSavedFoods(){
+<span class="nc" id="L51">        return savedFoodState.getSavedFoods();</span>
+    }
+
+    /***
+     * Formats the quantity of fibre with 2 decimal place and units (g)
+     * @param food food selected
+     * @return quantity of fibre with grams
+     */
+    public String getFibreFormat(Food food){
+<span class="nc" id="L60">        return decimalFormat.format(food.getNutrients().getFIBTG()) + &quot; g  &quot;;</span>
+    }
+
+
+    /***
+     * Formats the quantity of carbohydrates (by difference) with 2 decimal place and units (g)
+     * @param food food selected
+     * @return quantity of carbohydrates (by difference) with grams
+     */
+    public String getCarbohydrateFormat(Food food){
+<span class="nc" id="L70">        return decimalFormat.format(food.getCHOCDF()) + &quot; g  &quot;;</span>
+    }
+
+    /***
+     * Formats the quantity of fat with 2 decimal place and units (g)
+     * @param food food selected
+     * @return quantity of fat with grams
+     */
+    public String getFatFormat(Food food){
+<span class="nc" id="L79">        return decimalFormat.format(food.getFAT()) + &quot; g  &quot;;</span>
+    }
+
+    /***
+     * Formats the quantity of energy with 2 decimal place and units (kcal)
+     * @param food food selected
+     * @return quantity of energy with kcal
+     */
+    public String getEnergyFormat(Food food){
+<span class="nc" id="L88">        return decimalFormat.format(food.getENERC_KCAL()) + &quot; kcal  &quot;;</span>
+    }
+
+    /***
+     * Formats the quantity of protein with 2 decimal place and units (g)
+     * @param food food selected
+     * @return quantity of protein (by difference) with grams
+     */
+    public String getProteinFormat(Food food){
+<span class="nc" id="L97">        return decimalFormat.format(food.getPROCNT()) + &quot; g  &quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

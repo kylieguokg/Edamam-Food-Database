@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OutputHTTP.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">OutputHTTP.java</span></div><h1>OutputHTTP.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/***
+ * Manages sending the output report to PasteBin and Reddit
+ */
+public class OutputHTTP  {
+
+<span class="nc" id="L18">    String PASTEBIN_API_KEY  = System.getenv(&quot;PASTEBIN_API_KEY&quot;);</span>
+<span class="nc" id="L19">    String REDDIT_CLIENT_ID = System.getenv(&quot;REDDIT_CLIENT_ID&quot;);</span>
+<span class="nc" id="L20">    String REDDIT_SECRET = System.getenv(&quot;REDDIT_SECRET&quot;);</span>
+    String reddit_username;
+    String reddit_password;
+
+<span class="nc" id="L24">    Map&lt;String, String&gt; errorResponses = new LinkedHashMap&lt;String, String&gt;();</span>
+    private String outputLink;
+
+<span class="nc" id="L27">    public OutputHTTP(){</span>
+        // Pastebin error responses
+<span class="nc" id="L29">        errorResponses.put(&quot;Bad API request, invalid api_option&quot;, &quot;You can only paste&quot;);</span>
+<span class="nc" id="L30">        errorResponses.put(&quot;Bad API request, invalid api_dev_key&quot;, &quot;Invalid api_dev_key&quot;);</span>
+<span class="nc" id="L31">        errorResponses.put(&quot;Bad API request, maximum number of 25 unlisted pastes for your free account&quot;, &quot;Maximum number of 25 unlisted pastes for your free account&quot;);</span>
+<span class="nc" id="L32">        errorResponses.put(&quot;Bad API request, maximum number of 10 private pastes for your free account&quot;, &quot;Maximum number of 10 private pastes for your free account&quot;);</span>
+<span class="nc" id="L33">        errorResponses.put(&quot;Bad API request, api_paste_code was empty&quot;, &quot;You have no saved recipes&quot;);</span>
+<span class="nc" id="L34">        errorResponses.put(&quot;Bad API request, maximum paste file size exceeded&quot;, &quot;Maximum file size exceeded&quot;);</span>
+<span class="nc" id="L35">        errorResponses.put(&quot;Bad API request, Post limit, maximum pastes per 24h reached &quot;, &quot;Maximum pastes per 24h reached&quot;);</span>
+
+<span class="nc" id="L37">    }</span>
+
+    /***
+     * Requests Pastebin to make a post with the output text
+     * @param text list of saved foods output text
+     * @return if operation was successful
+     */
+    public String output(String text){
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (PASTEBIN_API_KEY == null){</span>
+<span class="nc" id="L47">            return &quot;ERROR: You have not set your environment variable PASTEBIN_API_KEY&quot;;</span>
+        }
+
+        {
+            try {
+
+<span class="nc" id="L53">                HttpRequest request = HttpRequest.newBuilder(new URI(&quot;https://pastebin.com/api/api_post.php&quot;))</span>
+<span class="nc" id="L54">                        .header(&quot;Content-type&quot;, &quot;application/x-www-form-urlencoded&quot;)</span>
+<span class="nc" id="L55">                        .POST(HttpRequest.BodyPublishers.ofString( &quot;api_dev_key=&quot; + PASTEBIN_API_KEY +</span>
+                                &quot;&amp;api_paste_code=&quot; + text +
+                                &quot;&amp;api_option=paste&quot;
+                        ))
+<span class="nc" id="L59">                        .build();</span>
+
+<span class="nc" id="L61">                HttpClient client = HttpClient.newBuilder().build();</span>
+
+<span class="nc" id="L63">                HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+
+<span class="nc" id="L65">                String errorResponse = errorResponses.get(response.body());</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                if (errorResponse != null){</span>
+<span class="nc" id="L67">                    return &quot;ERROR: &quot; + errorResponse;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                } else if (response.body().startsWith(&quot;Bad API request&quot;)){</span>
+<span class="nc" id="L69">                    return  &quot;ERROR: &quot; + response.body();</span>
+                }
+
+<span class="nc" id="L72">                outputLink = response.body();</span>
+
+<span class="nc" id="L74">                return &quot;ok&quot;;</span>
+
+<span class="nc" id="L76">            } catch (IOException | InterruptedException e) {</span>
+<span class="nc" id="L77">                return &quot;ERROR: Something went wrong with our request!&quot;;</span>
+
+<span class="nc" id="L79">            } catch (URISyntaxException ignored) {</span>
+                // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+                // hard-coded and so needs a way to be checked for correctness at runtime.
+<span class="nc" id="L82">                return &quot;ERROR: Invalid URL&quot;;</span>
+            }
+
+
+        }
+    }
+
+    /***
+     * Output link of Pastebin post
+     */
+    public String getOutputLink(){
+<span class="nc" id="L93">        return &quot;Here is your paste link: &quot; + outputLink;</span>
+    }
+
+
+    /***
+     * Attempts to retrieve an access token from Reddit
+     * @param username Reddit username
+     * @param password Reddit password
+     * @return whether or not operation was successful
+     */
+    public String getAccessToken(String username, String password){
+
+<span class="nc bnc" id="L105" title="All 4 branches missed.">        if (REDDIT_CLIENT_ID == null || REDDIT_SECRET == null) {</span>
+<span class="nc" id="L106">            return &quot;ERROR: Sorry you have not set your environment variables REDDIT_CLIENT_ID and REDDIT_SECRET&quot;;</span>
+        }
+
+
+<span class="nc" id="L110">        String full = REDDIT_CLIENT_ID + &quot;:&quot; + REDDIT_SECRET;</span>
+<span class="nc" id="L111">        String encoded = Base64.getEncoder().encodeToString(full.getBytes());</span>
+
+        try {
+
+<span class="nc" id="L115">            HttpRequest request = HttpRequest.newBuilder(new URI(&quot;https://www.reddit.com/api/v1/access_token&quot;))</span>
+<span class="nc" id="L116">                    .header(&quot;User-Agent&quot;, &quot;javafx:edanam-soft3202 (by /u/kylieg_uni&quot;)</span>
+<span class="nc" id="L117">                    .header(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;)</span>
+<span class="nc" id="L118">                    .header(&quot;Authorization&quot;, &quot;Basic &quot; + encoded)</span>
+<span class="nc" id="L119">                    .POST(HttpRequest.BodyPublishers.ofString(</span>
+                            &quot;grant_type=password&quot; +
+                                    &quot;&amp;username=&quot; + username +
+                                    &quot;&amp;password=&quot; + password
+                    ))
+<span class="nc" id="L124">                    .build();</span>
+
+<span class="nc" id="L126">            HttpClient client = HttpClient.newBuilder().build();</span>
+
+<span class="nc" id="L128">            HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+
+<span class="nc" id="L130">            reddit_username = username;</span>
+<span class="nc" id="L131">            reddit_password = password;</span>
+
+<span class="nc" id="L133">            return response.body();</span>
+
+<span class="nc" id="L135">        } catch (IOException | InterruptedException e) {</span>
+<span class="nc" id="L136">            return &quot;ERROR: Something went wrong with our request!&quot;;</span>
+
+<span class="nc" id="L138">        } catch (URISyntaxException ignored) {</span>
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+<span class="nc" id="L141">            return &quot;ERROR: Invalid URL&quot;;</span>
+        }
+
+
+    }
+
+    /***
+     * Attempts to make a post on Reddit with list of saved foods output
+     * @param output List of saved foods output
+     * @param accessToken Reddit access token
+     * @return whether or not operation was successful
+     */
+    public String postToReddit(String output, String accessToken){
+
+        try {
+
+<span class="nc" id="L157">            HttpRequest request = HttpRequest.newBuilder(new URI(&quot;https://oauth.reddit.com/api/submit&quot;))</span>
+<span class="nc" id="L158">                    .header(&quot;User-Agent&quot;, &quot;javafx:edanam-soft3202 (by /u/kylieg_uni&quot;)</span>
+<span class="nc" id="L159">                    .header(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;)</span>
+<span class="nc" id="L160">                    .header(&quot;Authorization&quot;, &quot;Bearer &quot; + accessToken)</span>
+<span class="nc" id="L161">                    .POST(HttpRequest.BodyPublishers.ofString(</span>
+                            &quot;title=Your Saved Foods and Total Nutritional Information&quot; +
+                                    &quot;&amp;text=&quot; + output +
+                                    &quot;&amp;sr=u_&quot; + reddit_username +
+                                    &quot;&amp;kind=self&quot;
+
+                    ))
+<span class="nc" id="L168">                    .build();</span>
+
+<span class="nc" id="L170">            HttpClient client = HttpClient.newBuilder().build();</span>
+
+<span class="nc" id="L172">            HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+
+<span class="nc" id="L174">            return response.body();</span>
+
+<span class="nc" id="L176">        } catch (IOException | InterruptedException e) {</span>
+<span class="nc" id="L177">            return &quot;ERROR: Something went wrong with our request!&quot;;</span>
+
+<span class="nc" id="L179">        } catch (URISyntaxException ignored) {</span>
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+<span class="nc" id="L182">            return &quot;ERROR: Invalid URL&quot;;</span>
+        }
+
+
+    }
+
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

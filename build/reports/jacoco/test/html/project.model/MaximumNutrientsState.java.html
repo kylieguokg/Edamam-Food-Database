@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaximumNutrientsState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">MaximumNutrientsState.java</span></div><h1>MaximumNutrientsState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages the maximum and running total nutrients
+ */
+public class MaximumNutrientsState implements Subject{
+
+    /***
+     * Currently logged in user
+     */
+    private User currentUser;
+
+    /***
+     * Database storing saved foods and users
+     */
+    private FoodDB foodDB;
+
+    /***
+     * List of observers who need to be updated if the maximum nutrients state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+
+    /***
+     * Stores the running total quantities for each nutrient
+     */
+    private Map&lt;String, Double&gt; runningTotals;
+
+
+
+    /***
+     * Result of a change in maximum total nutrients
+     */
+    private String maximumTotalNutrientState;
+
+
+<span class="fc" id="L42">    public MaximumNutrientsState(FoodDB foodDB, User currentUser){</span>
+<span class="fc" id="L43">        this.foodDB = foodDB;</span>
+<span class="fc" id="L44">        this.currentUser = currentUser;</span>
+<span class="fc" id="L45">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+
+<span class="fc" id="L47">    }</span>
+
+    /***
+     * Saved foods from database
+     * @return list of saved foods from database
+     */
+    public List&lt;Food&gt; getSavedFoods() {
+<span class="nc" id="L54">        return foodDB.getSavedFoods();</span>
+    }
+
+    /***
+     * Update the running total nutrients if this food was added
+     * @param selectedFood food that was added
+     */
+    public void saveFood(Food selectedFood){
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (selectedFood == null){</span>
+<span class="nc" id="L63">            return;</span>
+        }
+
+<span class="fc" id="L66">        Map&lt;String, Nutrient&gt; nutrients = selectedFood.getNutrientsList();</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (String curNutrientString : nutrients.keySet()){</span>
+
+<span class="fc" id="L70">            Nutrient nutrient = nutrients.get(curNutrientString);</span>
+
+<span class="fc" id="L72">            currentUser.addToRunningTotalNutrientsValue(curNutrientString, nutrient.getQuantity());</span>
+
+<span class="fc" id="L74">        }</span>
+
+<span class="fc" id="L76">        Map&lt;String, Nutrient&gt; nutrientsDaily = selectedFood.getDailyNutrientsList();</span>
+
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (String curNutrientString : nutrientsDaily.keySet()){</span>
+
+<span class="fc" id="L80">            Nutrient nutrient = nutrientsDaily.get(curNutrientString);</span>
+
+<span class="fc" id="L82">            currentUser.addToRunningTotalDailyNutrientsValue(curNutrientString, nutrient.getQuantity());</span>
+
+<span class="fc" id="L84">        }</span>
+
+<span class="fc" id="L86">        foodDB.saveTotalNutrients();</span>
+<span class="fc" id="L87">    }</span>
+
+
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L95">            observer.update();</span>
+<span class="fc" id="L96">        }</span>
+
+        // reset
+<span class="fc" id="L99">        maximumTotalNutrientState = null;</span>
+<span class="fc" id="L100">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L104">        observerList.add(observer);</span>
+<span class="fc" id="L105">    }</span>
+
+    /***
+     * Stores the nutrients for the running total nutrients
+     * @return  all the nutrients for the running total nutrients
+     */
+    public TotalNutrients getRunningTotalsTotalNutrients(){
+<span class="nc" id="L112">        return currentUser.getRunningTotalsTotalNutrients();</span>
+    }
+
+    /***
+     * Stores the nutrients for the running total nutrients (as daily %)
+     * @return  all the nutrients for the running total nutrients (as daily %)
+     */
+    public TotalNutrients getRunningTotalsTotalDaily(){
+<span class="nc" id="L120">        return currentUser.getRunningTotalsTotalDaily();}</span>
+
+    /***
+     * Stores the maximum total quantities for each nutrient
+     * @return all the nutrients for the maximum total nutrients
+     */
+    public TotalNutrients getMaximumTotalNutrients(){
+<span class="fc" id="L127">        return currentUser.getMaximumTotalNutrients();</span>
+    }
+
+    /***
+     * Change the maximum amount of a nutrient for a user (and saves it to the database)
+     */
+    public void setMaximumTotalNutrientValue(String nutrient, Double value){
+
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (value &lt; 0){</span>
+<span class="fc" id="L136">            throw new IllegalArgumentException(&quot;ERROR: Cannot have a max quantity less than 0&quot;);</span>
+        }
+
+<span class="fc" id="L139">        currentUser.setMaximumTotalNutrientValue(nutrient, value);</span>
+<span class="fc" id="L140">        foodDB.saveTotalNutrients();</span>
+<span class="fc" id="L141">        maximumTotalNutrientState = &quot;ok&quot;;</span>
+<span class="fc" id="L142">        notifyObservers();</span>
+<span class="fc" id="L143">    }</span>
+
+    /***
+     * Result of a change in maximum total nutrients
+     * @return max total nutrient state change
+     */
+    public String getMaximumTotalNutrientsState(){
+<span class="nc" id="L150">        return maximumTotalNutrientState;</span>
+    }
+
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L157">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L159">    }</span>
+
+    /***
+     * Gets map of nutrient name to nutrient object with running total quantity
+     * @return map of nutrient name to nutrient object with running total quantity
+     */
+    public Map&lt;String, Nutrient&gt; getRunningTotalNutrientsList(){
+<span class="fc" id="L166">        return currentUser.getRunningTotalNutrientsList();</span>
+    }
+
+
+    /***
+     * Gets map of nutrient name to nutrient object with running total daily percentage
+     * @return map of nutrient name to nutrient object with running total daily percentage
+     */
+    public Map&lt;String, Nutrient&gt; getRunningTotalDailyList(){
+<span class="fc" id="L175">        return currentUser.getRunningTotalDailyList();</span>
+    }
+
+    /***
+     * Gets map of nutrient name to nutrient object storing maximum quantity of the nutrient
+     * @return map of nutrient name to nutrient object
+     */
+    public Map&lt;String, Nutrient&gt; getMaxTotalNutrientsList(){
+<span class="nc" id="L183">        return currentUser.getMaxTotalNutrientsList();</span>
+    }
+
+
+    public Double getMaxNutrientQuantity(String nutrient) {
+<span class="nc" id="L188">        return currentUser.getMaxNutrientQuantity(nutrient);</span>
+    }
+
+    public Double getRunningTotalDailyQuantity(String nutrient){
+<span class="nc" id="L192">       return currentUser.getRunningTotalDailyQuantity(nutrient);</span>
+    }
+
+    public Double getRunningTotalQuantity(String nutrient){
+<span class="nc" id="L196">        return currentUser.getRunningTotalQuantity(nutrient);</span>
+    }
+}
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

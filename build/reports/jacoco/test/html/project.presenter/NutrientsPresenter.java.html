@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NutrientsPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.presenter</a> &gt; <span class="el_source">NutrientsPresenter.java</span></div><h1>NutrientsPresenter.java</h1><pre class="source lang-java linenums">package project.presenter;
+
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+
+import project.model.*;
+import project.view.NutrientsView;
+
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import java.text.DecimalFormat;
+
+/***
+ * Responsible for mutating the nutrients view and the nutrients state
+ */
+public class NutrientsPresenter implements Presenter, Observer, Subject {
+
+    /***
+     * Stores domain logic
+     */
+    private final Model model;
+
+
+    /***
+     * View displaying the nutritional value of food
+     */
+    private NutrientsView nutrientsView;
+
+    /***
+     * Manages the storing of saved foods of user
+     */
+    private final SavedFoodState savedFoodState;
+
+    /***
+     * Manages the selection of a food by a user to view more nutritional info about
+     */
+    private SelectedFoodState selectedFoodState;
+
+    /***
+     * Selected quantity of currently selected food
+     */
+    private int selectedQuantity;
+
+    /***
+     * Selected measure of currently selected food
+     */
+    private Measure selectedMeasure;
+
+    /***
+     * Currently selected food
+     */
+    private Food selectedFood;
+
+    /***
+     * If the colours of the page need to be set again
+     */
+    public boolean needColourUpdate;
+
+<span class="nc" id="L65">    private final ExecutorService pool = Executors.newFixedThreadPool(2, runnable -&gt; {</span>
+<span class="nc" id="L66">        Thread thread = new Thread(runnable);</span>
+<span class="nc" id="L67">        thread.setDaemon(true);</span>
+<span class="nc" id="L68">        return thread;</span>
+    });
+
+    /***
+     * List of types of fats
+     */
+    private List&lt;String&gt; fatStrings;
+
+    /***
+     * List of types of carbohydrates
+     */
+    private List&lt;String&gt; carbStrings;
+
+    /***
+     * Model logic for handling the maximum nutritional value for a food
+     */
+    private MaximumNutrientsState maximumNutrientsState;
+
+    /***
+     * List of observers who need to be updated if the saved foods state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    private DecimalFormat decimalFormat;
+
+<span class="nc" id="L93">    public NutrientsPresenter(Model model, NutrientsView nutrientsView) {</span>
+<span class="nc" id="L94">        this.model = model;</span>
+<span class="nc" id="L95">        this.selectedFoodState = model.getSelectedFoodState();</span>
+<span class="nc" id="L96">        this.savedFoodState = model.getSavedFoodState();</span>
+<span class="nc" id="L97">        this.maximumNutrientsState = savedFoodState.getMaximumNutrientsState();</span>
+<span class="nc" id="L98">        this.nutrientsView = nutrientsView;</span>
+
+<span class="nc" id="L100">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+
+<span class="nc" id="L102">        nutrientsView.setUp(this);</span>
+
+        // changes in the selection of food and saving of food affects this Presenter
+<span class="nc" id="L105">        selectedFoodState.subscribe(this);</span>
+<span class="nc" id="L106">        savedFoodState.subscribe(this);</span>
+
+<span class="nc" id="L108">        String pattern = &quot;##.##&quot;;</span>
+<span class="nc" id="L109">        decimalFormat = new DecimalFormat(pattern);</span>
+
+<span class="nc" id="L111">        fatStrings = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L112">        fatStrings.add(&quot;FAT&quot;);</span>
+<span class="nc" id="L113">        fatStrings.add(&quot;FASAT&quot;);</span>
+<span class="nc" id="L114">        fatStrings.add(&quot;FATRN&quot;);</span>
+<span class="nc" id="L115">        fatStrings.add(&quot;FAMS&quot;);</span>
+<span class="nc" id="L116">        fatStrings.add(&quot;FAPU&quot;);</span>
+
+<span class="nc" id="L118">        carbStrings = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L119">        carbStrings.add(&quot;CHOCDF&quot;);</span>
+<span class="nc" id="L120">        carbStrings.add(&quot;CHOCDF.net&quot;);</span>
+<span class="nc" id="L121">        carbStrings.add(&quot;FIBTG&quot;);</span>
+<span class="nc" id="L122">        carbStrings.add(&quot;SUGAR&quot;);</span>
+<span class="nc" id="L123">        carbStrings.add(&quot;SUGAR.added&quot;);</span>
+
+<span class="nc" id="L125">    }</span>
+
+    @Override
+    public void unsubscribePresenter() {
+<span class="nc" id="L129">        selectedFoodState.unsubscribe(this);</span>
+<span class="nc" id="L130">        savedFoodState.unsubscribe(this);</span>
+<span class="nc" id="L131">    }</span>
+
+    public boolean isNeedColourUpdate() {
+<span class="nc" id="L134">        return needColourUpdate;</span>
+    }
+
+    @Override
+    public void update() {
+
+        // if result of attempt to save food is received, display it
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (savedFoodState.getSavedFoodState() != null) {</span>
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            if (savedFoodState.getSavedFoodState().equals(&quot;ok&quot;)) {</span>
+<span class="nc" id="L144">                nutrientsView.displaySuccessMSG(&quot;SUCCESS: Please check the table for updated totals&quot;);</span>
+<span class="nc" id="L145">                nutrientsView.refreshTable();</span>
+            } else {
+<span class="nc" id="L147">                nutrientsView.displayErrorMSG(savedFoodState.getSavedFoodState());</span>
+            }
+
+
+        }
+
+        // if result of attempt to get cached version of food is received, display it
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (selectedFoodState.getCachedState() != null) {</span>
+<span class="nc" id="L155">            selectAFood(selectedFoodState.isCachedVersionAvailable());</span>
+        }
+
+        // if result of attempt to select food is received, display it
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (selectedFoodState.getSelectedFoodState() != null) {</span>
+<span class="nc" id="L160">            selectedFood = selectedFoodState.getSelectedFood();</span>
+<span class="nc" id="L161">            setNutrientsResults(selectedFoodState.getSelectedFoodState(), selectedFoodState.getSelectedFood());</span>
+        }
+
+
+<span class="nc" id="L165">    }</span>
+
+    @Override
+    public void notifyObservers() {
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        for (Observer observer : observerList){</span>
+<span class="nc" id="L171">            observer.update();</span>
+<span class="nc" id="L172">        }</span>
+
+        // reset state
+<span class="nc" id="L175">        needColourUpdate = false;</span>
+<span class="nc" id="L176">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="nc" id="L180">        observerList.add(observer);</span>
+<span class="nc" id="L181">    }</span>
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L186">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L188">    }</span>
+
+    public String getSelectedFoodLabel() {
+<span class="nc" id="L191">        return selectedFoodState.getSelectedFoodLabel();</span>
+    }
+
+    public Food getSelectedFood() {
+<span class="nc" id="L195">        return selectedFoodState.getSelectedFood();</span>
+    }
+
+    /***
+     * See the nutritional information for this selcted food, quantity and measure
+     * @param selectedMeasure
+     * @param selectedQuantitySTR
+     */
+    public void seeNutritionalInformation(Measure selectedMeasure, String selectedQuantitySTR) {
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (checkSelectInfo(selectedMeasure, selectedQuantitySTR)) {</span>
+
+            // have to check if there is a cached version first
+<span class="nc" id="L208">            selectedFoodState.checkIfCachedVersion(selectedMeasure, selectedFood, selectedQuantity);</span>
+        }
+
+<span class="nc" id="L211">    }</span>
+
+
+    /***
+     * Checks that a valid measure and quantity have been selected before
+     * retrieving the selection information for a food
+     * @return error message if inputs are not valid, otherwise message from database
+     */
+    public boolean checkSelectInfo(Measure selectedMeasure, String selectedQuantitySTR) {
+
+<span class="nc" id="L221">        selectedFood = selectedFoodState.getSelectedFood();</span>
+
+        // must select a measure
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (selectedMeasure == null) {</span>
+<span class="nc" id="L226">            nutrientsView.displayErrorMSG(&quot;ERROR: Please select a measure&quot;);</span>
+<span class="nc" id="L227">            return false;</span>
+        }
+
+        // quantity must be an integer
+
+        try {
+<span class="nc" id="L233">            selectedQuantity = Integer.parseInt(selectedQuantitySTR);</span>
+<span class="nc" id="L234">        } catch (NumberFormatException nfe) {</span>
+<span class="nc" id="L235">            nutrientsView.displayErrorMSG(&quot;ERROR: Please enter an integer&quot;);</span>
+<span class="nc" id="L236">            return false;</span>
+<span class="nc" id="L237">        }</span>
+
+<span class="nc" id="L239">        this.selectedMeasure = selectedMeasure;</span>
+<span class="nc" id="L240">        this.selectedQuantity = selectedQuantity;</span>
+
+<span class="nc" id="L242">        return true;</span>
+    }
+
+
+    /***
+     * Displays the results of an attempt to select food
+     * @param result results of an attempt to select food
+     * @param selectedFood food selected
+     */
+    public void setNutrientsResults(String result, Food selectedFood) {
+
+<span class="nc" id="L253">        Platform.runLater(() -&gt; {</span>
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            if (result == null) {</span>
+<span class="nc" id="L256">                return;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            } else if (result.startsWith(&quot;ERROR&quot;)) { // show error msg</span>
+<span class="nc" id="L258">                nutrientsView.displayErrorMSG(result);</span>
+            } else {
+<span class="nc" id="L260">                nutrientsView.removeMSG();</span>
+<span class="nc" id="L261">                nutrientsView.showNutrientsInformation(selectedFood);</span>
+<span class="nc" id="L262">                needColourUpdate = true;</span>
+<span class="nc" id="L263">                notifyObservers();</span>
+
+            }
+<span class="nc" id="L266">        });</span>
+
+<span class="nc" id="L268">    }</span>
+
+
+
+    /***
+     * If there is a cached version, asks user if they want to use it, else, just selects the food
+     * @param cachedVersionAvailable if there is a cahced version available or not
+     */
+    public void selectAFood(boolean cachedVersionAvailable) {
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (cachedVersionAvailable) {</span>
+<span class="nc" id="L279">            nutrientsView.setUpCacheHitAlert();</span>
+        } else {
+            // HTTP CALL
+<span class="nc" id="L282">            modelSelectAFood(false);</span>
+        }
+
+<span class="nc" id="L285">    }</span>
+
+    /***
+     * Asks the model to retrieve information about the currently selected food
+     * @param useCachedVersion use the cached version or not
+     */
+    public void modelSelectAFood(boolean useCachedVersion) {
+
+<span class="nc" id="L293">        Task&lt;String&gt; task = new Task&lt;String&gt;() {</span>
+            @Override
+            protected String call() throws Exception {
+<span class="nc" id="L296">                model.selectAFood(selectedQuantity, selectedMeasure, selectedFood, useCachedVersion);</span>
+<span class="nc" id="L297">                return null;</span>
+            }
+        };
+
+<span class="nc" id="L301">        pool.execute(task);</span>
+
+<span class="nc" id="L303">    }</span>
+
+    /***
+     * Retrieves and formats the name and units of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatNutrientSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (nutrient.getQuantity() != null) {</span>
+<span class="nc" id="L313">            return nutrient.getLabel() + &quot; (&quot; + nutrient.getUnit() + &quot;)&quot;;</span>
+        }
+
+<span class="nc" id="L316">        return nutrient.getLabel();</span>
+    }
+
+
+    /***
+     * Retrieves and formats the amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatQuantitySTR(Nutrient nutrient) {
+<span class="nc bnc" id="L326" title="All 4 branches missed.">        if (nutrient.getUnit() != null &amp;&amp; nutrient.getNutrient() != null) {</span>
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (selectedFood.getNutrientQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L329">                Double quantity = selectedFood.getNutrientQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L330">                return decimalFormat.format(quantity) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+            }
+        }
+
+<span class="nc" id="L334">        return &quot;&quot;;</span>
+    }
+
+    /***
+     * Retrieves and formats the resulting running total amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatResultingRunningTotalSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L344" title="All 6 branches missed.">        if (nutrient.getUnit() != null &amp;&amp; nutrient.getNutrient() != null &amp;&amp; nutrient.getQuantity() != null) {</span>
+
+<span class="nc bnc" id="L346" title="All 2 branches missed.">            if (selectedFood.getNutrientQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L347">                Double quantity = selectedFood.getNutrientQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L348">                return decimalFormat.format(quantity + nutrient.getQuantity()) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+            }
+        }
+
+<span class="nc" id="L352">        return &quot;&quot;;</span>
+    }
+
+
+    /***
+     * Retrieves and formats the running total amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatRunningTotalSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L363" title="All 4 branches missed.">        if (nutrient.getQuantity() != null &amp;&amp; nutrient.getUnit() != null) {</span>
+<span class="nc" id="L364">            return decimalFormat.format(nutrient.getQuantity()) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+        }
+
+<span class="nc" id="L367">        return &quot;&quot;;</span>
+    }
+
+
+    /***
+     * Retrieves and formats the total daily amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatTotalDailySTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L378" title="All 6 branches missed.">        if (nutrient.getUnit() != null &amp;&amp; nutrient.getNutrient() != null &amp;&amp; nutrient.getQuantity() != null) {</span>
+
+<span class="nc bnc" id="L380" title="All 2 branches missed.">            if (selectedFood.getDailyNutrientQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L381">                Double quantity = selectedFood.getDailyNutrientQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L382">                return decimalFormat.format(quantity) + &quot; %  &quot;;</span>
+            }
+        }
+
+<span class="nc" id="L386">        return &quot;&quot;;</span>
+
+    }
+
+
+    /***
+     * Retrieves and formats the maximum amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatMaximumSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L398" title="All 4 branches missed.">        if (nutrient.getUnit() != null &amp;&amp; nutrient.getNutrient() != null) {</span>
+
+<span class="nc bnc" id="L400" title="All 2 branches missed.">            if (maximumNutrientsState.getMaxNutrientQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L401">                Double quantity = maximumNutrientsState.getMaxNutrientQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L402">                return decimalFormat.format(quantity) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+            }
+        }
+
+
+<span class="nc" id="L407">        return &quot;&quot;;</span>
+
+    }
+
+
+    /***
+     * Gets map of nutrient name to nutrient object with running total quantity
+     * @return map of nutrient name to nutrient object with running total quantity
+     */
+    public Map&lt;String, Nutrient&gt; getRunningTotalNutrientsList() {
+<span class="nc" id="L417">        return maximumNutrientsState.getRunningTotalNutrientsList();</span>
+    }
+
+
+    /***
+     * Requests model to save the currently selected food, measure and quantity
+     * @param selectedMeasure
+     * @param selectedQuantitySTR
+     */
+    public void saveFood(Measure selectedMeasure, String selectedQuantitySTR) {
+
+<span class="nc bnc" id="L428" title="All 2 branches missed.">        if (checkSelectInfo(selectedMeasure, selectedQuantitySTR)) {</span>
+<span class="nc" id="L429">            model.saveFood();</span>
+        }
+
+<span class="nc" id="L432">    }</span>
+
+    /***
+     * Gets list of types of fats
+     * @return list of types of fats
+     */
+    public List&lt;String&gt; getFatStrings(){
+<span class="nc" id="L439">        return fatStrings;</span>
+    }
+
+    /***
+     * Gets list of types of carbohydrates
+     * @return list of types of carbohydrates
+     */
+    public List&lt;String&gt; getCarbStrings(){
+<span class="nc" id="L447">        return carbStrings;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

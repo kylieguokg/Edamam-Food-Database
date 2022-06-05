@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SavedFoodState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">SavedFoodState.java</span></div><h1>SavedFoodState.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/***
+ * Manages the saved foods of a user
+ */
+public class SavedFoodState implements Subject{
+
+    /**
+     * Currently logged in user
+     */
+    private User currentUser;
+
+    /***
+     * Stores the user's saved foods
+     */
+    private FoodDB foodDB;
+
+    /***
+     * List of observers who need to be updated if the saved foods state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    /***
+     * Current food being saved
+     */
+    private Food curSavedFood;
+
+    /***
+     * State of an attempt to change the saved food state
+     */
+    private String savedFoodState;
+
+    /***
+     * Holds the state of total nutritional information for a user's saved foods
+     */
+    private MaximumNutrientsState maximumNutrientsState;
+
+<span class="fc" id="L41">    public SavedFoodState(FoodDB foodDB, User currentUser){</span>
+<span class="fc" id="L42">        this.foodDB = foodDB;</span>
+<span class="fc" id="L43">        this.currentUser = currentUser;</span>
+<span class="fc" id="L44">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+
+<span class="fc" id="L46">        maximumNutrientsState = new MaximumNutrientsState(foodDB, currentUser);</span>
+
+
+<span class="fc" id="L49">        this.savedFoodState = null;</span>
+
+<span class="fc" id="L51">    }</span>
+
+    public List&lt;Food&gt; getSavedFoods() {
+<span class="fc" id="L54">        return foodDB.getSavedFoods();</span>
+    }
+
+    /***
+     * Saves user's selected food to its database of saved foods
+     * @param selectedFood
+     */
+    public void saveFood(Food selectedFood){
+
+<span class="fc" id="L63">        curSavedFood = selectedFood;</span>
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (selectedFood == null){</span>
+<span class="nc" id="L66">            return;</span>
+        }
+
+<span class="fc" id="L69">        maximumNutrientsState.saveFood(selectedFood);</span>
+
+<span class="fc" id="L71">        savedFoodState = foodDB.saveFood(selectedFood);</span>
+
+<span class="fc" id="L73">        notifyObservers();</span>
+<span class="fc" id="L74">    }</span>
+
+
+
+    @Override
+    public void notifyObservers() {
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (Observer observer : observerList){</span>
+<span class="fc" id="L82">            observer.update();</span>
+<span class="fc" id="L83">        }</span>
+
+        // reset state
+<span class="fc" id="L86">        savedFoodState = null;</span>
+<span class="fc" id="L87">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="fc" id="L91">        observerList.add(observer);</span>
+<span class="fc" id="L92">    }</span>
+
+    public Food getCurSavedFood() {
+<span class="fc" id="L95">        return curSavedFood;</span>
+    }
+
+    public String getSavedFoodState(){
+<span class="fc" id="L99">        return savedFoodState;</span>
+    }
+
+
+    /***
+     * Formulates the output text containing the list of currently selected ingredients (name, measure, value)
+     * along with the total nutritional value.
+     * @return the output text
+     */
+    public String getOutputText(){
+<span class="fc" id="L109">        String out = &quot;\n### List of Selected Ingredients ###\n\n&quot;;</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (Food food : getSavedFoods()){</span>
+<span class="fc" id="L112">            out += food.toString();</span>
+<span class="fc" id="L113">        }</span>
+
+<span class="fc" id="L115">        out += &quot;\n### Total Nutritional Value ###\n\n&quot;;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        for (Nutrient nutrient : maximumNutrientsState.getRunningTotalNutrientsList().values()){</span>
+<span class="fc" id="L117">            out += nutrient.toString();</span>
+<span class="fc" id="L118">        }</span>
+
+<span class="fc" id="L120">        out += &quot;\n### Total Daily Nutritional Value ###\n\n&quot;;</span>
+
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (Nutrient nutrient : maximumNutrientsState.getRunningTotalDailyList().values()){</span>
+<span class="fc" id="L123">            out += nutrient.toString();</span>
+<span class="fc" id="L124">        }</span>
+
+<span class="fc" id="L126">        return out;</span>
+    }
+
+    public MaximumNutrientsState getMaximumNutrientsState(){
+<span class="nc" id="L130">        return maximumNutrientsState;</span>
+    }
+
+    /***
+     * Retrieves the running total of total nutrients for user's list of saved foods
+     * @return running total of total nutrients for user's list of saved foods
+     */
+    public TotalNutrients getRunningTotalsTotalNutrients() {
+<span class="nc" id="L138">        return maximumNutrientsState.getRunningTotalsTotalNutrients();</span>
+    }
+
+    /***
+     * Retrieves the running total of total nutrients (daily) for user's list of saved foods
+     * @return running total of total nutrients (daily) for user's list of saved foods
+     */
+    public TotalNutrients getRunningTotalsTotalDaily() {
+<span class="nc" id="L146">        return maximumNutrientsState.getRunningTotalsTotalDaily();</span>
+    }
+
+    /***
+     * Retrieves the user's maximum values for nutrients
+     * @return  user's maximum values for nutrients
+     */
+    public TotalNutrients getMaximumTotalNutrients() {
+<span class="nc" id="L154">        return maximumNutrientsState.getMaximumTotalNutrients();</span>
+    }
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L160">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L162">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

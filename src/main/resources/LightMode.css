@@ -1,0 +1,464 @@
+/*--From task 2--*/
+@font-face {
+    font-family: 'Comfortaa';
+    src: url('Comfortaa-VariableFont_wght.ttf');
+}
+
+@font-face {
+    font-family: 'Comfortaa Bold';
+    src: url('Comfortaa-Bold.ttf');
+}
+
+
+.root {
+    -fx-font-size: 12 px;
+    -fx-font-family: 'Comfortaa';
+    -fx-background-color: TRANSPARENT;
+
+}
+
+.border-pane{
+    -fx-background-color: BLACK;
+}
+
+
+.button {
+    -fx-background-color: TRANSPARENT;
+    -fx-text-fill: BLACK;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-font-family: 'Comfortaa Bold';
+}
+
+#homeBTN{
+    -fx-content-display: BOTTOM;
+}
+
+
+.label {
+    -fx-alignment: CENTER;
+    -fx-max-width: 500;
+    -fx-text-fill: BLACK;
+    -fx-font-size: 14;
+}
+
+
+
+.text-field {
+    -fx-alignment: CENTER;
+    -fx-pref-width: 300;
+    -fx-border-color: BLACK;
+}
+
+#searchTF {
+    -fx-background-image:url('light-mode/black-search.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 10;
+    -fx-background-size: 20;
+    -fx-font-size: 20;
+    -fx-pref-width: 900;
+}
+
+.text-area{
+    -fx-text-fill: BLACK;
+    -fx-background-color: WHITE;
+    -fx-border-color: TRANSPARENT;
+    -fx-max-width: 400;
+    -fx-max-height: 60;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.text-area .content{
+    -fx-background-color: WHITE;
+}
+
+.text-area .text{
+    -fx-text-alignment: CENTER;
+}
+
+#nutrients {
+    -fx-min-width: 120;
+    -fx-font-family: 'Comfortaa Bold';
+    -fx-font-size: 14px;
+    -fx-alignment: top-left;
+}
+
+
+
+#nutrientsBox {
+    -fx-alignment: top-left;
+}
+
+
+
+#title {
+    -fx-font-size: 20px;
+    -fx-max-width: 1200;
+}
+
+.vbox {
+    -fx-alignment: CENTER;
+}
+
+#topBox {
+    -fx-padding: 50 50 25 50;
+}
+
+#right-aligned {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+#borderBTN{
+    -fx-border-color: BLACK;
+    -fx-label-padding: 5px;
+    -fx-min-width: 100;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+#hBox{
+    -fx-alignment: CENTER;
+}
+
+.menu-button{
+    -fx-background-color: transparent;
+}
+
+.menu-item .label {
+    -fx-text-fill: black;
+    -fx-font-size: 13px;
+}
+
+.menu-item:focused {
+    -fx-background-radius: 5px;
+    -fx-background-insets: 2px;
+}
+
+.menu-item {
+    -fx-padding: 8 12 8 12;
+}
+
+.context-menu {
+    -fx-background-color: rgba(128, 179, 128, 0.95);
+    -fx-background-radius: 5px;
+    -fx-background-insets: 5px;
+
+}
+
+.menu-button > .arrow-button {
+    -fx-padding: 0;
+}
+
+.menu-button > .arrow-button > .arrow {
+    -fx-padding: 0;
+}
+
+
+.imageView {
+    -fx-fit-to-width: 20.0;
+    -fx-fit-to-height: 20.0;
+}
+
+#FP{
+    -fx-border-color: TRANSPARENT;
+    -fx-alignment: baseline-left;
+}
+
+.table-column{
+    -fx-alignment: CENTER;
+}
+
+.table-view {
+    -fx-border-radius: 7px 7px 0px 0px;
+    -fx-background-color: TRANSPARENT;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-border-color: #80B380;
+    -fx-border-insets: 20;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #80B380;
+    -fx-background-radius: 7px 7px 0px 0px;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-border-color: transparent;
+
+}
+
+.table-view .column-header{
+    -fx-background-color: TRANSPARENT;
+}
+
+
+
+.table-row-cell{
+    -fx-text-alignment: CENTER;
+    -fx-text-fill: BLACK;
+    -fx-background-color: TRANSPARENT;
+}
+
+
+
+.table-view .table-cell{
+    -fx-text-fill: BLACK;
+    -fx-text-alignment: CENTER;
+
+}
+
+.table-row-cell:selected {
+    -fx-background-color:#416FF5;
+    -fx-text-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 2px;
+}
+
+
+.table-view *.scroll-bar:horizontal *.increment-button,
+.table-view *.scroll-bar:horizontal *.decrement-button {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+#failure {
+    -fx-background-color: #DC4E33;
+    -fx-padding: 10;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 2px;
+    -fx-alignment: CENTER;
+    -fx-max-width: 800;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+#success {
+    -fx-background-color: #56BC4C;
+    -fx-padding: 10;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 2px;
+    -fx-alignment: CENTER;
+    -fx-max-width: 800;
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+#gone {
+    -visibility: hidden;
+}
+.combo-box{
+    -fx-min-width: 200;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+    -fx-border-color: BLACK;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.scroll-pane{
+    -fx-background-color: transparent;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+.grid-pane{
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+}
+
+#h1 {
+    -fx-font-size: 50px;
+    -fx-border-color: WHITE;
+    -fx-border-width: 0px 0px 10px 0px;
+    -fx-text-alignment: CENTER;
+    -fx-padding: 0 0 0.25rem 0;
+    -fx-margin: 0 0 0.5rem 0;
+}
+
+.chart{
+    -fx-bar-gap: 10;
+}
+
+.axis{
+    -fx-tick-label-fill: BLACK;
+    -fx-show-tick-marks: false;
+    -fx-tick-label-font-family: 'Comfortaa';
+}
+
+.axis .label{
+    -fx-text-fill: BLACK;
+}
+
+
+.chart-legend {
+    -fx-background-color: WHITE;
+    -fx-border-insets: 100px;
+    -fx-padding: 10px;
+    -fx-text-fill: BLACK;
+}
+
+.default-color0.chart-bar { -fx-bar-fill: #99CCCC; }
+.default-color1.chart-bar { -fx-bar-fill: #A0B7FA; }
+
+
+.chart-legend .label {
+    -fx-text-fill: BLACK;
+}
+
+.chart-legend-item {
+    -fx-text-fill: BLACK;
+}
+
+.column-border{
+    -fx-border-color: #80B380;
+    -fx-border-width: 0px 1px 0px 1px;
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color :transparent;
+    -fx-border-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-border-radius :2.0em;
+}
+
+
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 0.0 10.0 0.0;
+
+}
+
+.scroll-bar:vertical .increment-button ,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 10.0 0.0 0.0;
+
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.15em 0.0;
+}
+
+.scroll-bar:vertical .increment-arrow,
+.scroll-bar:vertical .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.0 0.15em;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color :derive(black,90.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color :derive(black,10.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+.tree-table-view .column-header,
+.tree-table-view .column-header-background .filler,
+.tree-table-view .column-header-background {
+    -fx-background-color: TRANSPARENT;
+    -fx-background-radius: 7px 7px 0px 0px;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-border-color: transparent;
+    -fx-text-fill: WHITE;
+}
+
+.tree-table-view .column-border{
+    -fx-border-color: #80B380;
+    -fx-border-width: 0px 1px 0px 1px;
+}
+
+
+.label {
+    -fx-alignment: CENTER;
+    -fx-max-width: 500;
+
+    -fx-text-fill: WHITE;
+    -fx-text-alignment: CENTER;
+}
+
+.tree-table-view {
+    -fx-background-color: TRANSPARENT;
+    -fx-border-radius: 7px 7px 0px 0px;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-border-color: #80B380;
+    -fx-border-insets: 20;
+}
+
+.tree-table-view .cell{
+    -fx-text-fill: BLACK;
+    -fx-text-alignment: CENTER;
+}
+
+.tree-table-row-cell{
+
+    -fx-background-color: transparent;
+    -fx-text-fill: BLACK;
+    -fx-text-alignment: CENTER;
+}
+
+
+
+
+.tree-table-row-cell:selected {
+    -fx-background-color: #416FF5;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 2px;
+}
+
+.combo-box {
+    -fx-background-color: WHITE;
+}
+
+.tree-table-view *.scroll-bar:horizontal *.increment-button,
+.tree-table-view *.scroll-bar:horizontal *.decrement-button {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+#settings {
+    -fx-pref-height: 100%;
+    -fx-pref-width: 280;
+    -fx-text-align: center;
+    -fx-alignment: TOP_CENTER;
+}
+
+.color-picker {
+    -fx-border-color: WHITE;
+    -fx-background-color: TRANSPARENT;
+
+}
+
+.color-picker .label {
+    -fx-text-fill: BLACK;
+}
+
+
+#close {
+    -fx-border-color: TRANSPARENT;
+    -fx-text-fill: RED;
+    -fx-font-size: 30px;
+}

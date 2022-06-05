@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaximumNutrientsPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.presenter</a> &gt; <span class="el_source">MaximumNutrientsPresenter.java</span></div><h1>MaximumNutrientsPresenter.java</h1><pre class="source lang-java linenums">package project.presenter;
+
+import java.text.DecimalFormat;
+
+import project.model.*;
+import project.view.MaximumNutrientsView;
+
+import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+
+/***
+ * Responsible for mutating the maximum nutrients view and the maximum nutrients state
+ */
+public class MaximumNutrientsPresenter implements Presenter, Observer, Subject {
+
+    /***
+     * View for viewing the total nutritional value of saved foods
+     */
+    private MaximumNutrientsView maximumNutrientsView;
+
+
+    /***
+     * Model logic for handling the maximum nutritional value for a food
+     */
+    private MaximumNutrientsState maximumNutrientsState;
+
+    /***
+     * List of observers who need to be updated if the saved foods state is changed
+     */
+    private List&lt;Observer&gt; observerList;
+
+    /***
+     * If the colours of the page need to be set again
+     */
+    public boolean needColourUpdate;
+
+    private DecimalFormat decimalFormat;
+
+    /***
+     * List of types of fats
+     */
+    private List&lt;String&gt; fatStrings;
+
+    /***
+     * List of types of carbohydrates
+     */
+    private List&lt;String&gt; carbStrings;
+
+    /***
+     * Stores the max quantity numbers used for the bar chart
+     */
+    private Map&lt;String, Double&gt; maxQuantityPercents;
+
+    /***
+     * Stores the quantity numbers used for the bar chart
+     */
+    private Map&lt;String, Double&gt; quantityPercents;
+
+
+
+
+    public MaximumNutrientsPresenter(MaximumNutrientsState maximumNutrientsState,
+<span class="nc" id="L67">                                     MaximumNutrientsView currentView) {</span>
+
+<span class="nc" id="L69">        this.maximumNutrientsView = currentView;</span>
+<span class="nc" id="L70">        this.maximumNutrientsState = maximumNutrientsState;</span>
+<span class="nc" id="L71">        observerList = new CopyOnWriteArrayList&lt;Observer&gt;();</span>
+
+<span class="nc" id="L73">        maximumNutrientsState.subscribe(this);</span>
+
+<span class="nc" id="L75">        String pattern = &quot;##.##&quot;;</span>
+<span class="nc" id="L76">        decimalFormat = new DecimalFormat(pattern);</span>
+
+<span class="nc" id="L78">        fatStrings = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L79">        fatStrings.add(&quot;FAT&quot;);</span>
+<span class="nc" id="L80">        fatStrings.add(&quot;FASAT&quot;);</span>
+<span class="nc" id="L81">        fatStrings.add(&quot;FATRN&quot;);</span>
+<span class="nc" id="L82">        fatStrings.add(&quot;FAMS&quot;);</span>
+<span class="nc" id="L83">        fatStrings.add(&quot;FAPU&quot;);</span>
+
+<span class="nc" id="L85">        carbStrings = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L86">        carbStrings.add(&quot;CHOCDF&quot;);</span>
+<span class="nc" id="L87">        carbStrings.add(&quot;CHOCDF.net&quot;);</span>
+<span class="nc" id="L88">        carbStrings.add(&quot;FIBTG&quot;);</span>
+<span class="nc" id="L89">        carbStrings.add(&quot;SUGAR&quot;);</span>
+<span class="nc" id="L90">        carbStrings.add(&quot;SUGAR.added&quot;);</span>
+<span class="nc" id="L91">    }</span>
+
+
+    @Override
+    public void unsubscribePresenter(){
+<span class="nc" id="L96">        maximumNutrientsState.unsubscribe(this);</span>
+<span class="nc" id="L97">    }</span>
+
+
+    @Override
+    public void notifyObservers() {
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        for (Observer observer : observerList){</span>
+<span class="nc" id="L104">            observer.update();</span>
+<span class="nc" id="L105">        }</span>
+
+        // reset state
+<span class="nc" id="L108">        needColourUpdate = false;</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public void subscribe(Observer observer){
+<span class="nc" id="L113">        observerList.add(observer);</span>
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public void unsubscribe(Observer observer){
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (observerList.contains(observer)){</span>
+<span class="nc" id="L119">            observerList.remove(observer);</span>
+        }
+<span class="nc" id="L121">    }</span>
+
+
+    public boolean isNeedColourUpdate() {
+<span class="nc" id="L125">        return needColourUpdate;</span>
+    }
+
+
+    @Override
+    public void update(){
+
+        // If the max nutrients have been updated
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (maximumNutrientsState.getMaximumTotalNutrientsState() != null){</span>
+
+            // show the updated stacked bar chart
+<span class="nc" id="L136">            maximumNutrientsView.showStackedBarChart();</span>
+<span class="nc" id="L137">            needColourUpdate = true;</span>
+<span class="nc" id="L138">            notifyObservers();</span>
+        }
+
+<span class="nc" id="L141">    }</span>
+
+
+    /***
+     * Retrieves and formats the name and units of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatNutrientSTR(Nutrient nutrient) {
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (nutrient.getQuantity() != null) {</span>
+<span class="nc" id="L151">            return nutrient.getLabel() + &quot; (&quot; + nutrient.getUnit() + &quot;)&quot;;</span>
+        }
+
+<span class="nc" id="L154">        return nutrient.getLabel();</span>
+    }
+
+
+
+    /***
+     * Retrieves and formats the running total amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatRunningTotalSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (maximumNutrientsState.getRunningTotalQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L167">            Double quantity = maximumNutrientsState.getRunningTotalQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L168">            return decimalFormat.format(quantity) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+        } else {
+<span class="nc" id="L170">            return &quot;&quot;;</span>
+        }
+    }
+
+
+    /***
+     * Retrieves and formats the total daily amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatRunningTotalDailySTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (maximumNutrientsState.getRunningTotalDailyQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L183">            Double quantity = maximumNutrientsState.getRunningTotalDailyQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L184">            return decimalFormat.format(quantity) + &quot; %  &quot;;</span>
+        } else {
+<span class="nc" id="L186">            return &quot;&quot;;</span>
+        }
+
+    }
+
+
+    /***
+     * Retrieves and formats the maximum amount of this nutrient
+     * @param nutrient
+     * @return Formatted nutrients
+     */
+    public String formatMaximumSTR(Nutrient nutrient) {
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (maximumNutrientsState.getMaxNutrientQuantity(nutrient.getNutrient()) != null) {</span>
+<span class="nc" id="L200">            Double quantity = maximumNutrientsState.getMaxNutrientQuantity(nutrient.getNutrient());</span>
+<span class="nc" id="L201">            return decimalFormat.format(quantity) + &quot; &quot; + nutrient.getUnit() + &quot;  &quot;;</span>
+        } else {
+<span class="nc" id="L203">            return &quot;&quot;;</span>
+        }
+    }
+
+
+
+    /***
+     * Handles the changing of the maximum quantity in the table
+     * @param nutrient nutrient selected
+     * @param enteredQuantity quantity entered
+     */
+    public void changeQuantity(Nutrient nutrient, String enteredQuantity){
+
+        Double quantity;
+
+        // just take the first word
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (enteredQuantity.contains(&quot; &quot;)){</span>
+<span class="nc" id="L220">            enteredQuantity = enteredQuantity.substring(0, enteredQuantity.indexOf(' '));</span>
+        }
+
+        // has to be a double value
+        try {
+<span class="nc" id="L225">            quantity = Double.parseDouble(enteredQuantity);</span>
+<span class="nc" id="L226">        } catch (NumberFormatException nfe){</span>
+            // clear change
+<span class="nc" id="L228">            maximumNutrientsView.refreshTable();</span>
+<span class="nc" id="L229">            return;</span>
+<span class="nc" id="L230">        } catch (IllegalArgumentException i){</span>
+            // clear change
+<span class="nc" id="L232">            maximumNutrientsView.refreshTable();</span>
+<span class="nc" id="L233">            return;</span>
+<span class="nc" id="L234">        }</span>
+
+        // set the new max quantity
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (nutrient.setQuantity(quantity)){</span>
+<span class="nc" id="L238">            maximumNutrientsState.setMaximumTotalNutrientValue(nutrient.getNutrient(), quantity);</span>
+        } else {
+<span class="nc" id="L240">            maximumNutrientsView.refreshTable();</span>
+        }
+
+<span class="nc" id="L243">    }</span>
+
+    /***
+     * Gets data to represent max quantity percentage for
+     * each nutrient in the stacked bar chart
+     */
+    public Map&lt;String, Double&gt; getMaxQuantityPercents(){
+<span class="nc" id="L250">        return maxQuantityPercents;</span>
+    }
+
+    /***
+     * Gets data to represent the total quantity percentage for
+     * each nutrient in the stacked bar chart
+     */
+    public Map&lt;String, Double&gt; getQuantityPercents(){
+<span class="nc" id="L258">        return quantityPercents;</span>
+    }
+
+
+    /***
+     * Sets up data for stacked bar chart
+     * Note: These percentages aren't mathematically correct,
+     * they're just for the stacked bar chart,
+     * so I've put them in the presenter rather than model
+     */
+    public void setUpStackedBarChart(){
+
+<span class="nc" id="L270">        quantityPercents = new LinkedHashMap&lt;String, Double&gt;();</span>
+<span class="nc" id="L271">        maxQuantityPercents = new LinkedHashMap&lt;String, Double&gt;();</span>
+
+        // Retrieves the running total and maximum total for each nutrient
+        // and adds it as % to the chart's data
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        for (Nutrient nutrient : maximumNutrientsState.getRunningTotalNutrientsList().values()){</span>
+
+<span class="nc" id="L277">            Double maxQuantity = maximumNutrientsState.getMaxNutrientQuantity(nutrient.getNutrient());</span>
+
+<span class="nc bnc" id="L279" title="All 4 branches missed.">            if (nutrient.getQuantity() != null &amp;&amp; maxQuantity != null){</span>
+
+                Double percent;
+                Double remaining;
+
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                if (maxQuantity == 0){</span>
+<span class="nc" id="L285">                    percent = nutrient.getQuantity();</span>
+<span class="nc" id="L286">                    remaining = 100 - percent;</span>
+                } else {
+<span class="nc" id="L288">                    percent = (nutrient.getQuantity()/maxQuantity)*100;</span>
+<span class="nc" id="L289">                    remaining = 100 - percent;</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                    if (remaining &lt; 0){</span>
+<span class="nc" id="L291">                        remaining = 0.0;</span>
+                    }
+                }
+
+<span class="nc" id="L295">                quantityPercents.put(nutrient.getLabel(), percent);</span>
+<span class="nc" id="L296">                maxQuantityPercents.put(nutrient.getLabel(), remaining);</span>
+
+            }
+
+<span class="nc" id="L300">        }</span>
+
+
+<span class="nc" id="L303">    }</span>
+
+    /***
+     * Gets list of types of fats
+     * @return list of types of fats
+     */
+    public List&lt;String&gt; getFatStrings(){
+<span class="nc" id="L310">        return fatStrings;</span>
+    }
+
+    /***
+     * Gets list of types of carbohydrates
+     * @return list of types of carbohydrates
+     */
+    public List&lt;String&gt; getCarbStrings(){
+<span class="nc" id="L318">        return carbStrings;</span>
+    }
+
+    /***
+     * Gets map of nutrient name to nutrient object storing maximum quantity of the nutrient
+     * @return map of nutrient name to nutrient object
+     */
+    public Map&lt;String, Nutrient&gt; getMaxTotalNutrientsList() {
+<span class="nc" id="L326">        return maximumNutrientsState.getMaxTotalNutrientsList();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

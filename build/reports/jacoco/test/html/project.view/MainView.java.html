@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">MainView.java</span></div><h1>MainView.java</h1><pre class="source lang-java linenums">package project.view;
+
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+import javafx.util.Pair;
+import project.presenter.MainPresenter;
+import javafx.scene.layout.Priority;
+import javafx.scene.control.PasswordField;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Tooltip;
+
+
+import java.io.File;
+import java.util.Optional;
+
+
+/***
+ *  Manages the views and navigation
+ */
+<span class="nc" id="L36">public class MainView {</span>
+
+    private BorderPane borderPane;
+    private Stage stage;
+    private Scene currentScene;
+    private View currentView;
+
+<span class="nc" id="L43">    private boolean audioOn = true;</span>
+    private MediaPlayer mediaPlayer;
+
+    private boolean darkMode;
+
+    private StackPane topSP;
+    private HBox topBox;
+    private HBox extraBox;
+    private HBox navigationBox;
+
+    private Button darkModeBTN;
+    private MenuButton menuBTN;
+    private MenuItem outputBTN;
+    private MenuItem maxNutrientsBTN;
+<span class="nc" id="L57">    private Button savedFoodsBTN = new Button(&quot;&quot;);</span>
+<span class="nc" id="L58">    private Button homeBTN = new Button();</span>
+    private MenuItem clearCacheBTN;
+    private MenuItem redditBTN;
+    private Button saveBTN;
+    private Button settingsBTN;
+
+    private Label backgroundColourLBL;
+    private Label buttonColourLBL;
+    private Label textColourLBL;
+    private Label tableColourLBL;
+    private Label quantityColourLBL;
+    private Label maxQuantityColourLBL;
+
+    private ColorPicker backgroundColourPicker;
+    private ColorPicker buttonColourPicker;
+    private ColorPicker textColourPicker;
+    private ColorPicker tableColourPicker;
+    private ColorPicker quantityColourPicker;
+    private ColorPicker maxQuantityColourPicker;
+
+    private Image settingsIMG;
+    private Image homeIMG;
+    private Image speakerIMG;
+    private Image muteIMG;
+    private Image menuIMG;
+    private Image maxNutrientsIMG;
+    private Image clearCacheIMG;
+
+    private ImageView settingIV;
+    private ImageView homeIV;
+    private ImageView speakerIV;
+    private ImageView muteIV;
+    private ImageView menuIV;
+    private ImageView maxNutrientsIV;
+    private ImageView clearCacheIV;
+    private ImageView redditIV;
+
+    /***
+     *  Manages all the presenters and switches between them as necessary
+     */
+    private MainPresenter mainPresenter;
+
+    /***
+     * Gets the top stack pane which stores the navigation header
+     * @return top stock pane
+     */
+    public StackPane getTopSP(){
+<span class="nc" id="L105">        return topSP;</span>
+    }
+
+    /***
+     *   Starts in the search view
+     */
+    public void setUp(Stage stage, MainPresenter mainPresenter){
+
+<span class="nc" id="L113">        this.stage = stage;</span>
+<span class="nc" id="L114">        this.mainPresenter = mainPresenter;</span>
+
+<span class="nc" id="L116">        String path = &quot;src/main/resources/Doc-Earl-Klugh.mp3&quot;;</span>
+
+<span class="nc" id="L118">        Media media = new Media(new File(path).toURI().toString());</span>
+
+<span class="nc" id="L120">        mediaPlayer = new MediaPlayer(media);</span>
+
+<span class="nc" id="L122">        mediaPlayer.setAutoPlay(true);</span>
+<span class="nc" id="L123">        mediaPlayer.setOnEndOfMedia(new Runnable() {</span>
+            public void run() {
+<span class="nc" id="L125">                mediaPlayer.seek(Duration.ZERO); // play on loop</span>
+<span class="nc" id="L126">            }</span>
+        });
+
+<span class="nc" id="L129">    }</span>
+
+    /***
+     * Goes to this view
+     * @param view
+     */
+    public void goToView(View view){
+<span class="nc" id="L136">        this.currentView = view;</span>
+<span class="nc" id="L137">        this.currentScene = view.getScene();</span>
+<span class="nc" id="L138">        stage.setScene(currentScene);</span>
+<span class="nc" id="L139">    }</span>
+
+    /***
+     * Gors to login view
+     * @param view
+     */
+    public void goToView(LoginView view){
+<span class="nc" id="L146">        this.currentScene = view.getScene();</span>
+<span class="nc" id="L147">        stage.setScene(currentScene);</span>
+<span class="nc" id="L148">        stage.show();</span>
+<span class="nc" id="L149">    }</span>
+
+
+    /***
+     * Sets up the top navigation bar
+     */
+    public void setUpTopBox(){
+<span class="nc" id="L156">        setUpNavigationBar();</span>
+<span class="nc" id="L157">        setUpExtraBox();</span>
+
+<span class="nc" id="L159">        topBox = new HBox();</span>
+<span class="nc" id="L160">        topBox.setId(&quot;topBox&quot;);</span>
+<span class="nc" id="L161">        navigationBox.setId(&quot;hBox&quot;);</span>
+<span class="nc" id="L162">        extraBox.setId(&quot;hBox&quot;);</span>
+
+        // logo
+<span class="nc" id="L165">        HBox logoBox = new HBox();</span>
+<span class="nc" id="L166">        ImageView logoIV = new ImageView(new Image(&quot;Edamam_Badge_Transparent.png&quot;));</span>
+<span class="nc" id="L167">        logoIV.setFitHeight(50);</span>
+<span class="nc" id="L168">        logoIV.setPreserveRatio(true);</span>
+<span class="nc" id="L169">        logoBox.getChildren().add(logoIV);</span>
+<span class="nc" id="L170">        logoBox.setId(&quot;hBox&quot;);</span>
+
+        // put space between navigation bar and settings
+<span class="nc" id="L173">        Region region = new Region();</span>
+<span class="nc" id="L174">        HBox.setHgrow(region, Priority.ALWAYS);</span>
+<span class="nc" id="L175">        topBox.getChildren().addAll(navigationBox, region, extraBox);</span>
+
+<span class="nc" id="L177">        topSP = new StackPane();</span>
+<span class="nc" id="L178">        topSP.getChildren().addAll(logoBox, topBox);</span>
+<span class="nc" id="L179">    }</span>
+
+    /***
+     * Sets up navigation bar
+     */
+    public void setUpNavigationBar(){
+
+<span class="nc" id="L186">        navigationBox = new HBox(20);</span>
+<span class="nc" id="L187">        navigationBox.setAlignment(Pos.TOP_LEFT);</span>
+
+<span class="nc" id="L189">        setUpHomeBTN();</span>
+<span class="nc" id="L190">        setUpMenuBTN();</span>
+<span class="nc" id="L191">        setUpSavedFoodsBTN();</span>
+<span class="nc" id="L192">    }</span>
+
+
+    /***
+     * Sets up the dropdown menu button
+     */
+    public void setUpMenuBTN(){
+
+<span class="nc" id="L200">        menuBTN = new MenuButton();</span>
+
+<span class="nc" id="L202">        menuIV = new ImageView(new Image(&quot;dark-mode/white-menu.png&quot;));</span>
+<span class="nc" id="L203">        menuIV.setFitHeight(20.0);</span>
+<span class="nc" id="L204">        menuIV.setFitWidth(20.0);</span>
+<span class="nc" id="L205">        menuBTN.setGraphic(menuIV);</span>
+<span class="nc" id="L206">        menuBTN.setOnMouseEntered((e) -&gt; {</span>
+<span class="nc" id="L207">            menuBTN.fire();</span>
+<span class="nc" id="L208">        });</span>
+
+        // Post to Pastebin button
+<span class="nc" id="L211">        ImageView outputIV = new ImageView(&quot;pastebin-logo.png&quot;);</span>
+<span class="nc" id="L212">        outputIV.setFitHeight(20.0);</span>
+<span class="nc" id="L213">        outputIV.setFitWidth(20.0);</span>
+<span class="nc" id="L214">        outputBTN = new MenuItem(&quot;  Post to Pastebin&quot;, outputIV);</span>
+<span class="nc" id="L215">        setUpOutputBTN();</span>
+
+        // Post to Reddit button
+<span class="nc" id="L218">        redditIV = new ImageView(&quot;reddit-logo.png&quot;);</span>
+<span class="nc" id="L219">        redditIV.setFitHeight(20.0);</span>
+<span class="nc" id="L220">        redditIV.setFitWidth(20.0);</span>
+<span class="nc" id="L221">        redditBTN = new MenuItem(&quot;  Post to Reddit&quot;, redditIV);</span>
+<span class="nc" id="L222">        setUpRedditBTN();</span>
+
+        // See Total Nutritional Information button
+<span class="nc" id="L225">        maxNutrientsIV = new ImageView(&quot;dark-mode/white-nutrition.png&quot;);</span>
+<span class="nc" id="L226">        maxNutrientsIV.setFitHeight(20.0);</span>
+<span class="nc" id="L227">        maxNutrientsIV.setFitWidth(20.0);</span>
+<span class="nc" id="L228">        maxNutrientsBTN = new MenuItem(&quot;  See Total Nutritional Information&quot;, maxNutrientsIV);</span>
+<span class="nc" id="L229">        setUpMaxNutrientsBTN();</span>
+
+        // Clear Cache button
+<span class="nc" id="L232">        clearCacheIV = new ImageView(&quot;dark-mode/white-cache.png&quot;);</span>
+<span class="nc" id="L233">        clearCacheIV.setFitHeight(20.0);</span>
+<span class="nc" id="L234">        clearCacheIV.setFitWidth(20.0);</span>
+<span class="nc" id="L235">        clearCacheBTN = new MenuItem(&quot;  Clear Cache&quot;, clearCacheIV);</span>
+<span class="nc" id="L236">        setUpClearCacheBTN();</span>
+
+<span class="nc" id="L238">        menuBTN.getItems().addAll(outputBTN, redditBTN, maxNutrientsBTN, clearCacheBTN);</span>
+
+<span class="nc" id="L240">        navigationBox.getChildren().add(menuBTN);</span>
+<span class="nc" id="L241">    }</span>
+
+
+
+    /***
+     *   Sets up a button for allowing a user to output long report of saved ingredients
+     */
+    public void setUpOutputBTN(){
+
+<span class="nc" id="L250">        outputBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L251">            mainPresenter.output();</span>
+<span class="nc" id="L252">        });</span>
+
+<span class="nc" id="L254">    }</span>
+
+    /***
+     *   Sets up a button for allowing a user to output long report of saved ingredients
+     */
+    public void setUpOutputBTN(Button btn){
+
+<span class="nc" id="L261">        btn.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L262">            mainPresenter.output();</span>
+<span class="nc" id="L263">        });</span>
+
+<span class="nc" id="L265">    }</span>
+
+
+    /***
+     *   Sets up a button for allowing a user to post to Reddit
+     */
+    public void setUpRedditBTN(){
+
+<span class="nc" id="L273">        redditBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L274">            mainPresenter.postToReddit();</span>
+<span class="nc" id="L275">        });</span>
+
+<span class="nc" id="L277">    }</span>
+
+
+    /***
+     *   Sets up a button for allowing a user to post to Reddit
+     */
+    public void setUpRedditBTN(Button btn){
+
+<span class="nc" id="L285">        btn.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L286">            mainPresenter.postToReddit();</span>
+<span class="nc" id="L287">        });</span>
+
+
+<span class="nc" id="L290">    }</span>
+
+
+    /***
+     * Sets up Reddit Login BTN
+     */
+    public void setUpRedditLogin(){
+
+<span class="nc" id="L298">        Dialog&lt;Pair&lt;String, String&gt;&gt; redditLogin = new Dialog&lt;&gt;();</span>
+
+<span class="nc" id="L300">        ImageView imageView = new ImageView(&quot;reddit-logo.png&quot;);</span>
+<span class="nc" id="L301">        imageView.setFitHeight(30);</span>
+<span class="nc" id="L302">        imageView.setFitWidth(30);</span>
+<span class="nc" id="L303">        redditLogin.setGraphic(imageView);</span>
+<span class="nc" id="L304">        redditLogin.setHeaderText(&quot;Login to Reddit&quot;);</span>
+<span class="nc" id="L305">        redditLogin.setContentText(&quot;Please login to your Reddit account so that you can post.&quot;);</span>
+
+<span class="nc" id="L307">        ButtonType loginButtonType = new ButtonType(&quot;Sign in&quot;, ButtonBar.ButtonData.OK_DONE);</span>
+<span class="nc" id="L308">        redditLogin.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);</span>
+<span class="nc" id="L309">        redditLogin.getDialogPane().setStyle(&quot; -fx-font-family: 'Comfortaa'; -fx-min-width: 350; fx-alignment: CENTER&quot;);</span>
+
+<span class="nc" id="L311">        GridPane loginGP = new GridPane();</span>
+<span class="nc" id="L312">        loginGP.setHgap(10);</span>
+<span class="nc" id="L313">        loginGP.setVgap(20);</span>
+
+<span class="nc" id="L315">        Label userNameLBL = new Label(&quot;Username: &quot;);</span>
+<span class="nc" id="L316">        TextField userNameTF = new TextField();</span>
+
+<span class="nc" id="L318">        Label passwordLBL = new Label(&quot;Password: &quot;);</span>
+<span class="nc" id="L319">        PasswordField passwordTF = new PasswordField();</span>
+
+<span class="nc" id="L321">        loginGP.add(userNameLBL, 0, 0);</span>
+<span class="nc" id="L322">        loginGP.add(userNameTF, 1, 0);</span>
+<span class="nc" id="L323">        loginGP.add(passwordLBL, 0, 1);</span>
+<span class="nc" id="L324">        loginGP.add(passwordTF, 1, 1);</span>
+
+<span class="nc" id="L326">        redditLogin.getDialogPane().setContent(loginGP);</span>
+
+        // only if user clicks LOGIN, take the result
+<span class="nc" id="L329">        redditLogin.setResultConverter(clicked -&gt; {</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">            if (clicked == loginButtonType) {</span>
+<span class="nc" id="L331">                return new Pair&lt;&gt;(userNameTF.getText(), passwordTF.getText());</span>
+            }
+<span class="nc" id="L333">            return null;</span>
+        });
+
+<span class="nc" id="L336">        Optional&lt;Pair&lt;String, String&gt;&gt; result = redditLogin.showAndWait();</span>
+
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (result.isPresent()) {</span>
+<span class="nc" id="L340">            mainPresenter.loginReddit(userNameTF.getText(), passwordTF.getText());</span>
+        }
+
+<span class="nc" id="L343">    }</span>
+
+    /***
+     *   Sets up a button for allowing a user to save an ingredient to their list of saved foods
+     */
+    public void setUpSavedFoodsBTN(){
+
+<span class="nc" id="L350">        ImageView saveIV = new ImageView(new Image(&quot;heart.png&quot;));</span>
+<span class="nc" id="L351">        saveIV.setFitHeight(30.0);</span>
+<span class="nc" id="L352">        saveIV.setFitWidth(30.0);</span>
+<span class="nc" id="L353">        savedFoodsBTN.setGraphic(saveIV);</span>
+<span class="nc" id="L354">        Tooltip saveTT = new Tooltip(&quot;See saved foods&quot;);</span>
+<span class="nc" id="L355">        saveTT.setShowDelay(Duration.seconds(0));</span>
+<span class="nc" id="L356">        savedFoodsBTN.setTooltip(saveTT);</span>
+
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (navigationBox.getChildren().contains(savedFoodsBTN)){</span>
+<span class="nc" id="L359">           navigationBox.getChildren().remove(savedFoodsBTN);</span>
+        }
+
+<span class="nc" id="L362">        savedFoodsBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L363">            mainPresenter.goToSavedFoods();</span>
+<span class="nc" id="L364">        });</span>
+
+<span class="nc" id="L366">        navigationBox.getChildren().add(savedFoodsBTN);</span>
+
+<span class="nc" id="L368">    }</span>
+
+    /***
+     *   Sets up a button for allowing a user to view
+     *   the running total nutrition information for list of saved foods
+     */
+    public void setUpMaxNutrientsBTN(){
+
+<span class="nc" id="L376">        maxNutrientsBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L377">            mainPresenter.goToMaxNutrients();</span>
+<span class="nc" id="L378">        });</span>
+
+<span class="nc" id="L380">    }</span>
+
+    /***
+     *   Sets up a button for allowing a user to view
+     *   the running total nutrition information for list of saved foods
+     */
+    public void setUpMaxNutrientsBTN(Button btn){
+
+<span class="nc" id="L388">        btn.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L389">            mainPresenter.goToMaxNutrients();</span>
+<span class="nc" id="L390">        });</span>
+
+
+<span class="nc" id="L393">    }</span>
+
+
+    /***
+     *   Sets up a button for allowing a user to return to home
+     *   @param navigationBox navigation box to store the button
+     */
+    public void setUpHomeBTN(){
+
+<span class="nc" id="L402">        homeIV = new ImageView(homeIMG);</span>
+<span class="nc" id="L403">        homeIV.setFitHeight(30.0);</span>
+<span class="nc" id="L404">        homeIV.setFitWidth(30.0);</span>
+<span class="nc" id="L405">        homeBTN.setGraphic(homeIV);</span>
+
+<span class="nc" id="L407">        navigationBox.getChildren().add(homeBTN);</span>
+<span class="nc" id="L408">        homeBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L409">            mainPresenter.goToSearchView();</span>
+<span class="nc" id="L410">        });</span>
+
+<span class="nc" id="L412">        homeBTN.setId(&quot;homeBTN&quot;);</span>
+<span class="nc" id="L413">    }</span>
+
+
+    /***
+     *   Sets up a button for clearing cache
+     *   @param navigationBox navigation box to store the button
+     */
+    public void setUpClearCacheBTN(){
+
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        if (navigationBox.getChildren().contains(clearCacheBTN)){</span>
+<span class="nc" id="L423">            navigationBox.getChildren().remove(clearCacheBTN);</span>
+        }
+
+<span class="nc" id="L426">        clearCacheBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L427">            mainPresenter.clearCache();</span>
+<span class="nc" id="L428">        });</span>
+<span class="nc" id="L429">    }</span>
+
+    /***
+     *   Set up theme song toggle
+     */
+    public void setUpThemeSongBTN(){
+
+        // Speaker symbol
+<span class="nc" id="L437">        speakerIV = new ImageView(homeIMG);</span>
+<span class="nc" id="L438">        speakerIV.setFitHeight(30.0);</span>
+<span class="nc" id="L439">        speakerIV.setFitWidth(30.0);</span>
+
+
+<span class="nc" id="L442">        Button themeSongBTN = new Button();</span>
+<span class="nc" id="L443">        themeSongBTN.setGraphic(speakerIV);</span>
+<span class="nc" id="L444">        themeSongBTN.setStyle(&quot;-fx-border-color: TRANSPARENT&quot;);</span>
+<span class="nc" id="L445">        extraBox.getChildren().add(themeSongBTN);</span>
+
+<span class="nc" id="L447">        themeSongBTN.setOnAction((ActionEvent e) -&gt; {</span>
+
+<span class="nc bnc" id="L449" title="All 2 branches missed.">            audioOn = !audioOn;</span>
+
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            if (audioOn){</span>
+
+<span class="nc" id="L453">                speakerIV.setImage(speakerIMG);</span>
+<span class="nc" id="L454">                mediaPlayer.setMute(false);</span>
+
+            } else {
+<span class="nc" id="L457">                speakerIV.setImage(muteIMG);</span>
+<span class="nc" id="L458">                mediaPlayer.setMute(true);</span>
+            }
+
+<span class="nc" id="L461">        });</span>
+
+<span class="nc" id="L463">    }</span>
+
+
+
+    /***
+     *   Set up theme song toggle
+     */
+    public void setUpDarkModeBTN(){
+
+<span class="nc" id="L472">        darkModeBTN = new Button();</span>
+
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if (darkMode){</span>
+<span class="nc" id="L475">            darkModeBTN.setText(&quot;Dark Mode On&quot;);</span>
+        } else {
+<span class="nc" id="L477">            darkModeBTN.setText(&quot;Light Mode On&quot;);</span>
+        }
+
+<span class="nc" id="L480">        darkModeBTN.setId(&quot;borderBTN&quot;);</span>
+
+<span class="nc" id="L482">        extraBox.getChildren().add(darkModeBTN);</span>
+
+<span class="nc" id="L484">        darkModeBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc bnc" id="L485" title="All 2 branches missed.">            darkMode = !darkMode;</span>
+<span class="nc" id="L486">            mainPresenter.setDarkMode();</span>
+<span class="nc" id="L487">        });</span>
+
+<span class="nc" id="L489">    }</span>
+
+
+    /***
+     * Sets view to reflect dark mode
+     */
+    public void setDarkMode(){
+<span class="nc" id="L496">        darkMode = true;</span>
+<span class="nc" id="L497">        darkModeBTN.setText(&quot;Dark Mode On&quot;);</span>
+
+<span class="nc" id="L499">        settingsIMG = new Image(&quot;dark-mode/white-gear.png&quot;);</span>
+<span class="nc" id="L500">        settingIV.setImage(settingsIMG);</span>
+
+<span class="nc" id="L502">        homeIMG = new Image(&quot;dark-mode/white-home.png&quot;);</span>
+<span class="nc" id="L503">        homeIV.setImage(homeIMG);</span>
+
+<span class="nc" id="L505">        speakerIMG = new Image(&quot;dark-mode/white-speaker.png&quot;);</span>
+<span class="nc" id="L506">        muteIMG = new Image(&quot;dark-mode/white-mute.png&quot;);</span>
+
+<span class="nc bnc" id="L508" title="All 2 branches missed.">        if (audioOn){</span>
+<span class="nc" id="L509">            speakerIV.setImage(speakerIMG);</span>
+        } else {
+<span class="nc" id="L511">            speakerIV.setImage(muteIMG);</span>
+        }
+
+<span class="nc" id="L514">        menuIMG = new Image(&quot;dark-mode/white-menu.png&quot;);</span>
+<span class="nc" id="L515">        menuIV.setImage(menuIMG);</span>
+
+<span class="nc" id="L517">        maxNutrientsIMG = new Image(&quot;dark-mode/white-nutrition.png&quot;);</span>
+<span class="nc" id="L518">        maxNutrientsIV.setImage(maxNutrientsIMG);</span>
+
+<span class="nc" id="L520">        clearCacheIMG = new Image(&quot;dark-mode/white-cache.png&quot;);</span>
+<span class="nc" id="L521">        clearCacheIV.setImage(clearCacheIMG);</span>
+
+<span class="nc" id="L523">        currentScene.getStylesheets().remove(&quot;LightMode.css&quot;);</span>
+<span class="nc" id="L524">        currentScene.getStylesheets().add(&quot;DarkMode.css&quot;);</span>
+<span class="nc" id="L525">    }</span>
+
+
+    /***
+     * Sets view to reflect light mode
+     */
+    public void setLightMode(){
+<span class="nc" id="L532">        darkMode = false;</span>
+
+<span class="nc" id="L534">        darkModeBTN.setText(&quot;Light Mode On&quot;);</span>
+<span class="nc" id="L535">        settingsIMG = new Image(&quot;light-mode/black-gear.png&quot;);</span>
+<span class="nc" id="L536">        settingIV.setImage(settingsIMG);</span>
+
+<span class="nc" id="L538">        homeIMG = new Image(&quot;light-mode/black-home.png&quot;);</span>
+<span class="nc" id="L539">        homeIV.setImage(homeIMG);</span>
+
+<span class="nc" id="L541">        speakerIMG = new Image(&quot;light-mode/black-speaker.png&quot;);</span>
+<span class="nc" id="L542">        muteIMG = new Image(&quot;light-mode/black-mute.png&quot;);</span>
+
+<span class="nc bnc" id="L544" title="All 2 branches missed.">        if (audioOn){</span>
+<span class="nc" id="L545">            speakerIV.setImage(speakerIMG);</span>
+        } else {
+<span class="nc" id="L547">            speakerIV.setImage(muteIMG);</span>
+        }
+
+<span class="nc" id="L550">        menuIMG = new Image(&quot;light-mode/black-menu.png&quot;);</span>
+<span class="nc" id="L551">        menuIV.setImage(menuIMG);</span>
+
+<span class="nc" id="L553">        maxNutrientsIMG = new Image(&quot;light-mode/black-nutrition.png&quot;);</span>
+<span class="nc" id="L554">        maxNutrientsIV.setImage(maxNutrientsIMG);</span>
+
+<span class="nc" id="L556">        clearCacheIMG = new Image(&quot;light-mode/black-cache.png&quot;);</span>
+<span class="nc" id="L557">        clearCacheIV.setImage(clearCacheIMG);</span>
+
+<span class="nc" id="L559">        currentScene.getStylesheets().remove(&quot;DarkMode.css&quot;);</span>
+<span class="nc" id="L560">        currentScene.getStylesheets().add(&quot;LightMode.css&quot;);</span>
+
+<span class="nc" id="L562">    }</span>
+
+    /***
+     *  Retrieves the respective stylesheet
+     *  depending on the current mode
+     */
+    public String getStyleSheet() {
+<span class="nc bnc" id="L569" title="All 2 branches missed.">        if (darkMode) {</span>
+<span class="nc" id="L570">            return &quot;DarkMode.css&quot;;</span>
+        } else {
+<span class="nc" id="L572">            return &quot;LightMode.css&quot;;</span>
+        }
+    }
+
+
+     /***
+     * Converts colour to RGB format
+     * Citation: How to get hex web String from JavaFX ColorPicker color?
+     * (2013, July 29). Stack Overflow.
+     * https://stackoverflow.com/questions/17925318/how-to-get-hex-web-string-from-javafx-colorpicker-color/18803814#18803814
+     * @param color color to convert
+     */
+    public static String toRGBCode( Color color )
+    {
+<span class="nc" id="L586">        return String.format( &quot;#%02X%02X%02X&quot;,</span>
+<span class="nc" id="L587">                (int)( color.getRed() * 255 ),</span>
+<span class="nc" id="L588">                (int)( color.getGreen() * 255 ),</span>
+<span class="nc" id="L589">                (int)( color.getBlue() * 255 ) );</span>
+    }
+
+    /***
+     * Sets up settings button
+     * @param box
+     */
+    public void setUpSettingsButton(){
+
+<span class="nc" id="L598">        settingsIMG = new Image(&quot;light-mode/black-gear.png&quot;);</span>
+<span class="nc" id="L599">        settingIV = new ImageView(settingsIMG);</span>
+<span class="nc" id="L600">        settingsBTN = new Button(&quot;&quot;);</span>
+<span class="nc" id="L601">        settingsBTN.setStyle(&quot;-fx-border-color: TRANSPARENT&quot;);</span>
+<span class="nc" id="L602">        settingIV.setFitHeight(30.0);</span>
+<span class="nc" id="L603">        settingIV.setFitWidth(30.0);</span>
+<span class="nc" id="L604">        settingsBTN.setGraphic(settingIV);</span>
+<span class="nc" id="L605">        Tooltip settingsTT = new Tooltip(&quot;Adjust colours&quot;);</span>
+<span class="nc" id="L606">        settingsTT.setShowDelay(Duration.seconds(0));</span>
+<span class="nc" id="L607">        settingsBTN.setTooltip(settingsTT);</span>
+
+<span class="nc" id="L609">        extraBox.getChildren().add(settingsBTN);</span>
+
+<span class="nc" id="L611">        VBox settingsMenu = new VBox(12);</span>
+<span class="nc" id="L612">        settingsMenu.setId(&quot;settings&quot;);</span>
+
+<span class="nc" id="L614">        Button closeButton = new Button(Character.toString(10005));</span>
+<span class="nc" id="L615">        closeButton.setId(&quot;close&quot;);</span>
+<span class="nc" id="L616">        settingsMenu.getChildren().add(closeButton);</span>
+
+<span class="nc" id="L618">        backgroundColourLBL = new Label(&quot;Background Colour: &quot;);</span>
+<span class="nc" id="L619">        backgroundColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L621">        buttonColourLBL = new Label(&quot;Button: &quot;);</span>
+<span class="nc" id="L622">        buttonColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L624">        textColourLBL = new Label(&quot;Text: &quot;);</span>
+<span class="nc" id="L625">        textColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L627">        tableColourLBL = new Label(&quot;Table: &quot;);</span>
+<span class="nc" id="L628">        tableColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L630">        quantityColourLBL = new Label(&quot;Quantity: &quot;);</span>
+<span class="nc" id="L631">        quantityColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L633">        maxQuantityColourLBL = new Label(&quot;Max Quantity: &quot;);</span>
+<span class="nc" id="L634">        maxQuantityColourPicker = new ColorPicker();</span>
+
+<span class="nc" id="L636">        settingsMenu.getChildren().addAll(backgroundColourLBL, backgroundColourPicker,</span>
+                buttonColourLBL, buttonColourPicker,
+                textColourLBL, textColourPicker,
+                tableColourLBL, tableColourPicker,
+                quantityColourLBL, quantityColourPicker,
+                maxQuantityColourLBL, maxQuantityColourPicker);
+
+
+<span class="nc" id="L644">        saveBTN = new Button(&quot;Save&quot;);</span>
+<span class="nc" id="L645">        saveBTN.setId(&quot;borderBTN&quot;);</span>
+
+<span class="nc" id="L647">        Region space = new Region();</span>
+
+<span class="nc" id="L649">        settingsMenu.getChildren().addAll(space, saveBTN);</span>
+
+<span class="nc" id="L651">        settingsBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L652">            currentView.openSettings(settingsMenu);</span>
+<span class="nc" id="L653">        });</span>
+
+<span class="nc" id="L655">        closeButton.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L656">            currentView.closeSettings(settingsMenu);</span>
+<span class="nc" id="L657">        });</span>
+
+<span class="nc" id="L659">        saveBTN.setOnAction((ActionEvent e) -&gt; {</span>
+<span class="nc" id="L660">            Color backgroundColour = backgroundColourPicker.getValue();</span>
+<span class="nc" id="L661">            Color buttonColour = buttonColourPicker.getValue();</span>
+<span class="nc" id="L662">            Color textColour = textColourPicker.getValue();</span>
+<span class="nc" id="L663">            Color tableColour = tableColourPicker.getValue();</span>
+<span class="nc" id="L664">            Color quantityColour = quantityColourPicker.getValue();</span>
+<span class="nc" id="L665">            Color maxQuantityColour = maxQuantityColourPicker.getValue();</span>
+
+<span class="nc" id="L667">            mainPresenter.saveColours(darkMode, toRGBCode(backgroundColour), toRGBCode(buttonColour), toRGBCode(textColour),</span>
+<span class="nc" id="L668">                    toRGBCode(tableColour), toRGBCode(quantityColour),</span>
+<span class="nc" id="L669">                    toRGBCode(maxQuantityColour));</span>
+
+<span class="nc" id="L671">        });</span>
+
+<span class="nc" id="L673">    }</span>
+
+
+    /***
+     * Sets colours to the settings panel
+     * @param darkMode
+     * @param backgroundColour
+     * @param buttonColour
+     * @param textColour
+     * @param tableColour
+     * @param quantityColour
+     * @param maxQuantityColour
+     */
+    public void setSettingsColours(boolean darkMode, String backgroundColour,String buttonColour, String textColour,
+                                   String tableColour, String quantityColour, String maxQuantityColour){
+
+
+<span class="nc bnc" id="L690" title="All 2 branches missed.">        if (darkMode){</span>
+<span class="nc" id="L691">            setDarkMode();</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">        } else if (!darkMode){</span>
+<span class="nc" id="L693">            setLightMode();</span>
+        }
+
+        // text colour
+<span class="nc" id="L697">        outputBTN.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L698">        clearCacheBTN.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L699">        redditBTN.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L700">        maxNutrientsBTN.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+
+        // button colour
+<span class="nc" id="L703">        darkModeBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour +</span>
+                &quot;; -fx-text-fill: &quot; + buttonColour);
+
+<span class="nc" id="L706">       saveBTN.setStyle(&quot;-fx-border-color: &quot; + buttonColour +</span>
+                &quot;; -fx-text-fill: &quot; + buttonColour);
+
+<span class="nc" id="L709">        backgroundColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L710">        backgroundColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L711">        backgroundColourPicker.setValue(Color.valueOf(backgroundColour));</span>
+
+<span class="nc" id="L713">        buttonColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L714">        buttonColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L715">        buttonColourPicker.setValue(Color.valueOf(buttonColour));</span>
+
+<span class="nc" id="L717">        textColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L718">        textColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L719">        textColourPicker.setValue(Color.valueOf(textColour));</span>
+
+<span class="nc" id="L721">        tableColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L722">        tableColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L723">        tableColourPicker.setValue(Color.valueOf(tableColour));</span>
+
+<span class="nc" id="L725">        quantityColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L726">        quantityColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L727">        quantityColourPicker.setValue(Color.valueOf(quantityColour));</span>
+
+<span class="nc" id="L729">        maxQuantityColourLBL.setStyle(&quot;-fx-text-fill: &quot; + textColour);</span>
+<span class="nc" id="L730">        maxQuantityColourPicker.setStyle(&quot;-fx-border-color: &quot; + buttonColour);</span>
+<span class="nc" id="L731">        maxQuantityColourPicker.setValue(Color.valueOf(maxQuantityColour));</span>
+<span class="nc" id="L732">    }</span>
+
+
+    /***
+     * Sets up Extra Box which contains non-domain specific extras
+     */
+    public void setUpExtraBox(){
+<span class="nc" id="L739">        extraBox = new HBox(20);</span>
+<span class="nc" id="L740">        extraBox.setAlignment(Pos.TOP_RIGHT);</span>
+
+<span class="nc" id="L742">        setUpDarkModeBTN();</span>
+<span class="nc" id="L743">        setUpThemeSongBTN();</span>
+<span class="nc" id="L744">        setUpSettingsButton();</span>
+<span class="nc" id="L745">    }</span>
+
+
+    /***
+     * Sets colours of setting panel
+     * @param darkMode
+     * @param backgroundColour
+     * @param buttonColour
+     * @param textColour
+     * @param tableColour
+     * @param quantityColour
+     * @param maxQuantityColour
+     */
+    public void setColours(boolean darkMode, String backgroundColour, String buttonColour, String textColour,
+                           String tableColour, String quantityColour, String maxQuantityColour){
+
+<span class="nc" id="L761">        setSettingsColours(darkMode, backgroundColour, buttonColour,textColour, tableColour, quantityColour, maxQuantityColour);</span>
+
+
+<span class="nc" id="L764">    }</span>
+
+    /***
+     * Displays alert that the cache has been cleared
+     */
+    public void cacheClearedAlert(){
+<span class="nc" id="L770">        Alert alert = new Alert(Alert.AlertType.INFORMATION);</span>
+<span class="nc" id="L771">        DialogPane dialogPane = alert.getDialogPane();</span>
+<span class="nc" id="L772">        alert.setContentText(&quot;Cache has been cleared&quot;);</span>
+<span class="nc" id="L773">        dialogPane.setStyle(&quot; -fx-font-family: 'Comfortaa';&quot;);</span>
+<span class="nc" id="L774">        alert.showAndWait();</span>
+<span class="nc" id="L775">    }</span>
+
+    /***
+     * Displays output of an attempt to post output
+     * @param out
+     */
+    public void setOutputTXT(String out){
+
+        Alert alert;
+        DialogPane dialogPane;
+<span class="nc bnc" id="L785" title="All 2 branches missed.">        if (out.startsWith(&quot;ERROR&quot;)){</span>
+<span class="nc" id="L786">            alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L787">            alert.setContentText(out);</span>
+
+
+        } else {
+<span class="nc" id="L791">            alert = new Alert(Alert.AlertType.INFORMATION);</span>
+<span class="nc" id="L792">            TextArea txtArea = new TextArea(out);</span>
+<span class="nc" id="L793">            txtArea.setEditable(false);</span>
+<span class="nc" id="L794">            alert.getDialogPane().setContent(txtArea);</span>
+        }
+
+<span class="nc" id="L797">        dialogPane = alert.getDialogPane();</span>
+<span class="nc" id="L798">        dialogPane.setStyle(&quot; -fx-font-family: 'Comfortaa';&quot;);</span>
+<span class="nc" id="L799">        alert.showAndWait();</span>
+
+<span class="nc" id="L801">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

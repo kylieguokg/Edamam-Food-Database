@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodDBHTTP.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">FoodDBHTTP.java</span></div><h1>FoodDBHTTP.java</h1><pre class="source lang-java linenums">package project.model;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+
+/***
+ * Manages retrieving data from Edanam Food Database
+ */
+
+<span class="nc" id="L15">public class FoodDBHTTP {</span>
+
+    /***
+     * Input API Key from Edanam
+     */
+<span class="nc" id="L20">    String INPUT_API_KEY = System.getenv(&quot;INPUT_API_KEY&quot;);</span>
+
+    /***
+     * Input API ID from Edanam
+     */
+<span class="nc" id="L25">    String INPUT_API_APP_ID  = System.getenv(&quot;INPUT_API_APP_ID&quot;);</span>
+
+
+    /***
+     * Sends HTTP request for data for searching for this ingredient
+     * @param ingredient ingredient to search for
+     * @return JsonElement storing the results of search
+     */
+    public String enterAnIngredient(String ingredient) {
+
+        try {
+
+<span class="nc" id="L37">            HttpRequest request = HttpRequest.newBuilder(new URI(&quot;https://api.edamam.com/api/food-database/v2/parser&quot; +</span>
+                                                                    &quot;?app_id=&quot; + INPUT_API_APP_ID +
+                                                                    &quot;&amp;app_key=&quot; + INPUT_API_KEY +
+                                                                    &quot;&amp;ingr=&quot; + ingredient))
+<span class="nc" id="L41">                    .GET()</span>
+<span class="nc" id="L42">                    .build();</span>
+
+<span class="nc" id="L44">            HttpClient client = HttpClient.newBuilder().build();</span>
+
+<span class="nc" id="L46">            HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+
+<span class="nc" id="L48">            return response.body();</span>
+
+<span class="nc" id="L50">        } catch (IOException | InterruptedException e) {</span>
+
+<span class="nc" id="L52">            String errorStr = &quot;{'HTTPError':'ERROR: Something went wrong with our request!'}&quot;;</span>
+<span class="nc" id="L53">            return errorStr;</span>
+
+
+<span class="nc" id="L56">        } catch (URISyntaxException ignored) {</span>
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+<span class="nc" id="L59">            String errorStr = &quot;{'HTTPError':'ERROR: Invalid URI'}&quot;;</span>
+<span class="nc" id="L60">            return errorStr;</span>
+        }
+
+    }
+
+    /***
+     * Sends HTTP request to get total nutritional information for a food, measure and quantity
+     * @param quantity quantity of food
+     * @param measure measure of food
+     * @param food food more information is being requested for
+     * @return JsonElement storing the results of search
+     */
+    public String selectAFood(int quantity, Measure measure, Food food){
+        {
+            try {
+
+<span class="nc" id="L76">                String foodHeader = &quot;{\&quot;ingredients\&quot;: [{\&quot;quantity\&quot;: &quot; + quantity + &quot;, &quot;</span>
+<span class="nc" id="L77">                        + &quot;\&quot;measureURI\&quot;: \&quot;&quot; + measure.getUri() + &quot;\&quot;,&quot;</span>
+<span class="nc" id="L78">                        + &quot;\&quot;foodId\&quot;: \&quot;&quot; + food.getFoodId() + &quot;\&quot;}]}&quot;;</span>
+
+
+<span class="nc" id="L81">                HttpRequest request = HttpRequest.newBuilder(new URI(&quot;https://api.edamam.com/api/food-database/v2/nutrients&quot; +</span>
+                                &quot;?app_id=&quot; + INPUT_API_APP_ID +
+                                &quot;&amp;app_key=&quot; + INPUT_API_KEY
+                        ))
+<span class="nc" id="L85">                        .header(&quot;content-type&quot;, &quot;application/json&quot;)</span>
+<span class="nc" id="L86">                        .POST(HttpRequest.BodyPublishers.ofString(foodHeader))</span>
+<span class="nc" id="L87">                        .build();</span>
+
+
+<span class="nc" id="L90">                HttpClient client = HttpClient.newBuilder().build();</span>
+
+<span class="nc" id="L92">                HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+
+<span class="nc" id="L94">                return response.body();</span>
+
+<span class="nc" id="L96">            } catch (IOException | InterruptedException e) {</span>
+<span class="nc" id="L97">                String errorStr = &quot;{'HTTPError':'ERROR: Something went wrong with our request!'}&quot;;</span>
+
+<span class="nc" id="L99">                return errorStr;</span>
+
+<span class="nc" id="L101">            } catch (URISyntaxException ignored) {</span>
+                // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+                // hard-coded and so needs a way to be checked for correctness at runtime.
+<span class="nc" id="L104">                String errorStr = &quot;{'HTTPError':'ERROR: Invalid URI'}&quot;;</span>
+<span class="nc" id="L105">                return errorStr;</span>
+            }
+
+
+        }
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

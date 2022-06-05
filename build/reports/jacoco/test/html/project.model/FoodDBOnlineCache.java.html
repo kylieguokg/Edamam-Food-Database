@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodDBOnlineCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.model</a> &gt; <span class="el_source">FoodDBOnlineCache.java</span></div><h1>FoodDBOnlineCache.java</h1><pre class="source lang-java linenums">package project.model;
+
+import com.google.gson.Gson;
+
+import java.io.File;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/***
+ * Manages the retrieval and storing of data in SQLite database
+ */
+public class FoodDBOnlineCache {
+
+    private static final String dbName = &quot;foodDB.db&quot;;
+    private static final String dbURL = &quot;jdbc:sqlite:&quot; + dbName;
+    private String currentUser;
+    private Gson gson;
+
+<span class="nc" id="L20">    public FoodDBOnlineCache(){</span>
+<span class="nc" id="L21">        gson = new Gson();</span>
+<span class="nc" id="L22">    }</span>
+
+
+    /***
+     * Creates user table, cached foods table and saved foods table
+     * User table - stores the username, password, and personalisation info for a user
+     * Cached Foods table - stores all the nutritional information for a food
+     * Saved Foods table - stores the saved foods of users
+     */
+    public static void createDatabaseWithSchema(){
+
+<span class="fc" id="L33">        File dbFile = new File(dbName);</span>
+
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (dbFile.exists()) {</span>
+<span class="fc" id="L36">            return;</span>
+        }
+
+<span class="nc" id="L39">        String createUsersTableSQL =</span>
+                &quot;&quot;&quot;
+                CREATE TABLE IF NOT EXISTS users (
+                    username TEXT UNIQUE,
+                    password TEXT NOT NULL,
+                    personalisation TEXT NOT NULL,
+                    PRIMARY KEY (username)
+                );
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L49">        String createCachedFoodsTableSQL =</span>
+                &quot;&quot;&quot;
+                    CREATE TABLE IF NOT EXISTS cachedFoods (
+                        foodId TEXT NOT NULL,
+                        measureURI TEXT NOT NULL,
+                        quantity INTEGER NOT NULL,
+                      	foodInfo TEXT NOT NULL,
+                        PRIMARY KEY (foodId, measureURI, quantity)
+                    );
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L60">        String createSavedFoodsTableSQL =</span>
+                &quot;&quot;&quot;
+                    CREATE TABLE IF NOT EXISTS savedFoods (
+                        username TEXT,
+                        foodId TEXT,
+                        foodInfo TEXT NOT NULL,
+                        PRIMARY KEY (username, foodId),
+                        FOREIGN KEY (username) REFERENCES users (username)
+                                                                   ON DELETE
+                                                                   CASCADE
+                    );
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L73">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L74">             Statement statement = conn.createStatement()) {</span>
+
+            // If we get here that means no exception raised from getConnection - meaning it worked
+<span class="nc" id="L77">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L79">            statement.execute(createUsersTableSQL);</span>
+<span class="nc" id="L80">            statement.execute(createCachedFoodsTableSQL);</span>
+<span class="nc" id="L81">            statement.execute(createSavedFoodsTableSQL);</span>
+
+<span class="nc" id="L83">        } catch (SQLException e) {</span>
+<span class="nc" id="L84">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L85">            System.exit(-1);</span>
+<span class="nc" id="L86">        }</span>
+<span class="nc" id="L87">    }</span>
+
+
+    /***
+     * Creates a new user, stores their username and hashed password
+     * @param username username (plain text)
+     * @param password password (hashed)
+     * @param user user to store
+     * @return if it was successful
+     */
+    public String createUser(String username, String password, User user){
+
+<span class="nc" id="L99">        String createUserSQL =</span>
+                &quot;&quot;&quot;
+                INSERT OR IGNORE INTO users (username, password, personalisation)
+                VALUES (?, ?, ?)
+                &quot;&quot;&quot;;
+<span class="nc" id="L104">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L105">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L106">                     conn.prepareStatement(createUserSQL)) {</span>
+<span class="nc" id="L107">            preparedStatement.setString(1, username);</span>
+<span class="nc" id="L108">            preparedStatement.setString(2, password);</span>
+<span class="nc" id="L109">            preparedStatement.setString(3, gson.toJson(user));</span>
+
+<span class="nc" id="L111">            preparedStatement.executeUpdate();</span>
+
+<span class="nc" id="L113">            return &quot;Success&quot;;</span>
+
+<span class="nc" id="L115">        } catch (SQLException e) {</span>
+<span class="nc" id="L116">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L117">            System.exit(-1);</span>
+<span class="nc" id="L118">            return &quot;Sorry, couldn't add user&quot;;</span>
+        }
+    }
+
+
+    /***
+     * Stores a selected food in the cachedFood table
+     * @param selectedFood food to be stored
+     * @param quantity quantity of food
+     * @return if it was successful
+     */
+    public void cacheSelectedFood(Food selectedFood, int quantity){
+
+
+<span class="nc" id="L132">        String cacheFoodSQL =</span>
+                &quot;&quot;&quot;
+                INSERT OR IGNORE INTO cachedFoods (foodId, measureURI, quantity, foodInfo)
+                VALUES (?, ?, ?, ?);
+                &quot;&quot;&quot;;
+<span class="nc" id="L137">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L138">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L139">                     conn.prepareStatement(cacheFoodSQL)) {</span>
+
+<span class="nc" id="L141">            preparedStatement.setString(1, selectedFood.getFoodId());</span>
+<span class="nc" id="L142">            preparedStatement.setString(2, selectedFood.getSelectedMeasure().getUri());</span>
+<span class="nc" id="L143">            preparedStatement.setInt(3, quantity);</span>
+<span class="nc" id="L144">            preparedStatement.setString(4, gson.toJson(selectedFood));</span>
+<span class="nc" id="L145">            preparedStatement.executeUpdate();</span>
+
+<span class="nc" id="L147">        } catch (SQLException e) {</span>
+<span class="nc" id="L148">            System.out.println(&quot;save food&quot;);</span>
+<span class="nc" id="L149">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L150">            System.exit(-1);</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">    }</span>
+
+    /***
+     * Stores user's saved food in savedFoods table
+     * @param username  user whose food is being saved
+     * @param selectedFood food to save
+     */
+    public String saveFood(String username, Food selectedFood){
+
+<span class="nc" id="L161">        String saveFoodSQL =</span>
+                &quot;&quot;&quot;
+                INSERT OR IGNORE INTO savedFoods (username, foodId, foodInfo)
+                VALUES (?, ?, ?);
+                &quot;&quot;&quot;;
+<span class="nc" id="L166">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L167">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L168">                     conn.prepareStatement(saveFoodSQL)) {</span>
+
+<span class="nc" id="L170">            preparedStatement.setString(1, username);</span>
+<span class="nc" id="L171">            preparedStatement.setString(2, selectedFood.getFoodId());</span>
+<span class="nc" id="L172">            preparedStatement.setString(3, gson.toJson(selectedFood));</span>
+<span class="nc" id="L173">            preparedStatement.executeUpdate();</span>
+
+<span class="nc" id="L175">            return &quot;ok&quot;;</span>
+
+<span class="nc" id="L177">        } catch (SQLException e) {</span>
+<span class="nc" id="L178">            System.out.println(&quot;save food&quot;);</span>
+<span class="nc" id="L179">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L180">            return &quot;Could not save food to database&quot;;</span>
+
+        }
+    }
+
+    /***
+     * Gets total nutritional information for a food, measure and quantity
+     * @param foodId unique id for food
+     * @param measureURI unique URI for measure
+     * @param quantity quantity of food
+     * @return results of query
+     */
+    public List&lt;String&gt; getCachedFood(String foodId, String measureURI, int quantity){
+
+<span class="nc" id="L194">        String cachedFoodSQL =</span>
+                &quot;&quot;&quot;
+                SELECT *
+                FROM cachedFoods
+                WHERE foodId = ? AND measureURI = ? AND quantity = ?;
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L201">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L202">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L203">                     conn.prepareStatement(cachedFoodSQL)) {</span>
+
+<span class="nc" id="L205">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L207">            preparedStatement.setString(1, foodId);</span>
+<span class="nc" id="L208">            preparedStatement.setString(2, measureURI);</span>
+<span class="nc" id="L209">            preparedStatement.setInt(3, quantity);</span>
+
+<span class="nc" id="L211">            ResultSet results = preparedStatement.executeQuery();</span>
+
+            // if no nutrient information is saved for that food and measure
+<span class="nc" id="L214">            List&lt;String&gt; out = new ArrayList&lt;String&gt;();</span>
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">            while (results.next()) {</span>
+<span class="nc" id="L217">                out.add(results.getString(&quot;foodInfo&quot;));</span>
+            }
+
+<span class="nc" id="L220">            return out;</span>
+
+<span class="nc" id="L222">            } catch (SQLException e) {</span>
+<span class="nc" id="L223">            System.out.println(e.getMessage());</span>
+
+<span class="nc" id="L225">            return null;</span>
+        }
+
+    }
+
+    /***
+     * Gets list of saved foods for user
+     * @param username username of user
+     * @return results of query
+     */
+    public List&lt;String&gt; getSavedFoods(String username){
+
+<span class="nc" id="L237">        String savedFoodSQL =</span>
+                &quot;&quot;&quot;
+                SELECT *
+                FROM savedFoods
+                WHERE username = ?;
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L244">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L245">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L246">                     conn.prepareStatement(savedFoodSQL)) {</span>
+
+<span class="nc" id="L248">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L250">            preparedStatement.setString(1, username);</span>
+
+
+<span class="nc" id="L253">            ResultSet results = preparedStatement.executeQuery();</span>
+
+<span class="nc" id="L255">            List&lt;String&gt; out = new ArrayList&lt;String&gt;();</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            while (results.next()) {</span>
+<span class="nc" id="L258">                out.add(results.getString(&quot;foodInfo&quot;));</span>
+
+            }
+
+<span class="nc" id="L262">            return out;</span>
+
+<span class="nc" id="L264">        } catch (SQLException e) {</span>
+<span class="nc" id="L265">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L266">            System.exit(-1);</span>
+<span class="nc" id="L267">            return null;</span>
+        }
+
+    }
+
+    /***
+     * Clears the cached of searched foods
+     */
+    public void clearCache(){
+
+<span class="nc" id="L277">        String clearCacheSQL =</span>
+                &quot;&quot;&quot;
+               DELETE FROM cachedFoods;
+                &quot;&quot;&quot;;
+<span class="nc" id="L281">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L282">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L283">                     conn.prepareStatement(clearCacheSQL)) {</span>
+
+<span class="nc" id="L285">            preparedStatement.executeUpdate();</span>
+
+<span class="nc" id="L287">        } catch (SQLException e) {</span>
+<span class="nc" id="L288">            System.out.println(&quot;save food&quot;);</span>
+<span class="nc" id="L289">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L290">            System.exit(-1);</span>
+<span class="nc" id="L291">        }</span>
+
+
+<span class="nc" id="L294">    }</span>
+
+    /***
+     * Tries to find a matching user given a username and password
+     * @param username (plain text)
+     * @param password (hashed)
+     * @return results of query
+     */
+    public List&lt;String&gt; login(String username, String password){
+
+<span class="nc" id="L304">        String loginSQL =</span>
+                &quot;&quot;&quot;
+                SELECT *
+                FROM users
+                WHERE username = ? AND password = ?;
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L311">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L312">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L313">                     conn.prepareStatement(loginSQL)) {</span>
+
+<span class="nc" id="L315">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L317">            preparedStatement.setString(1, username);</span>
+<span class="nc" id="L318">            preparedStatement.setString(2, password);</span>
+
+<span class="nc" id="L320">            ResultSet results = preparedStatement.executeQuery();</span>
+
+<span class="nc" id="L322">            List&lt;String&gt; out = new ArrayList&lt;String&gt;();</span>
+
+<span class="nc bnc" id="L324" title="All 2 branches missed.">            while (results.next()) {</span>
+<span class="nc" id="L325">                out.add(results.getString(&quot;personalisation&quot;));</span>
+            }
+
+<span class="nc" id="L328">            return out;</span>
+
+<span class="nc" id="L330">        } catch (SQLException e) {</span>
+<span class="nc" id="L331">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L332">            System.exit(-1);</span>
+<span class="nc" id="L333">            return null;</span>
+        }
+
+    }
+
+    /***
+     * Checks if username
+     * @param username
+     * @return results of query
+     */
+    public boolean checkUsernameExists(String username){
+
+<span class="nc" id="L345">        String loginSQL =</span>
+                &quot;&quot;&quot;
+                SELECT *
+                FROM users
+                WHERE username = ?;
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L352">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L353">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L354">                     conn.prepareStatement(loginSQL)) {</span>
+
+<span class="nc" id="L356">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L358">            preparedStatement.setString(1, username);</span>
+
+<span class="nc" id="L360">            ResultSet results = preparedStatement.executeQuery();</span>
+
+<span class="nc" id="L362">            List&lt;String&gt; out = new ArrayList&lt;String&gt;();</span>
+
+<span class="nc bnc" id="L364" title="All 2 branches missed.">            if (results.next()){</span>
+<span class="nc" id="L365">                return true;</span>
+            }
+
+<span class="nc" id="L368">            return false;</span>
+
+<span class="nc bnc" id="L370" title="All 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L371">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L372">            System.exit(-1);</span>
+<span class="nc" id="L373">            return false;</span>
+        }
+
+    }
+
+
+    /***
+     * Updates the personalisation information for a user
+     * @param user user whose information is being updated
+     */
+    public void updatePersonalisation(User user){
+
+<span class="nc" id="L385">        String updatePersonalisationSQL =</span>
+                &quot;&quot;&quot;
+                UPDATE users 
+                SET personalisation = ?
+                WHERE username = ?;
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L392">        try (Connection conn = DriverManager.getConnection(dbURL);</span>
+<span class="nc" id="L393">             PreparedStatement preparedStatement =</span>
+<span class="nc" id="L394">                     conn.prepareStatement(updatePersonalisationSQL)) {</span>
+
+<span class="nc" id="L396">            conn.createStatement().execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+
+<span class="nc" id="L398">            preparedStatement.setString(1, gson.toJson(user));</span>
+<span class="nc" id="L399">            preparedStatement.setString(2, user.getUsername());</span>
+
+<span class="nc" id="L401">            preparedStatement.executeUpdate();</span>
+
+<span class="nc" id="L403">        } catch (SQLException e) {</span>
+<span class="nc" id="L404">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L405">            System.exit(-1);</span>
+<span class="nc" id="L406">        }</span>
+
+<span class="nc" id="L408">    }</span>
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

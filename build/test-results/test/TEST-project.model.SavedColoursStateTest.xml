@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="project.model.SavedColoursStateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2022-06-05T09:45:00" hostname="Kylies-MacBook-Pro.local" time="0.008">
+  <properties/>
+  <testcase name="setDarkModeTest()" classname="project.model.SavedColoursStateTest" time="0.003"/>
+  <testcase name="saveColoursTest2()" classname="project.model.SavedColoursStateTest" time="0.002"/>
+  <testcase name="saveColoursTest()" classname="project.model.SavedColoursStateTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

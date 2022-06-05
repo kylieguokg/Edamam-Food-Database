@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">major_project</a> &gt; <a href="index.source.html" class="el_package">project.view</a> &gt; <span class="el_source">LoginView.java</span></div><h1>LoginView.java</h1><pre class="source lang-java linenums">package project.view;
+
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import project.presenter.LoginPresenter;
+import javafx.scene.layout.Region;
+
+/***
+ *   Displays the login and registration page
+ */
+<span class="nc" id="L20">public class LoginView {</span>
+
+    private Scene scene;
+
+    /***
+     *   Presenter responsible for mutating this view and the model
+     */
+    private LoginPresenter loginPresenter;
+
+    /***
+     *  Displays the result of login attempt
+     */
+    private Label loginLBL;
+
+    /***
+     *  Displays the result of registration attempt
+     */
+    private TextArea registerTA;
+
+    /***
+     * Holds the login form
+     */
+    private VBox logInBox;
+
+    /***
+     * Holds the registration form
+     */
+    private VBox registerBox;
+
+    public Scene getScene(){
+<span class="nc" id="L50">        return scene;</span>
+    }
+
+    /***
+     * Sets up the login and registration view
+     * @param loginPresenter presenter responsible for mutating view and model
+     */
+    public void display(LoginPresenter loginPresenter){
+
+<span class="nc" id="L59">        this.loginPresenter = loginPresenter;</span>
+
+<span class="nc" id="L61">        BorderPane borderPaneNotLoggedIn = new BorderPane();</span>
+<span class="nc" id="L62">        scene = new Scene(borderPaneNotLoggedIn, 1400, 800);</span>
+<span class="nc" id="L63">        scene.getStylesheets().add(&quot;Style.css&quot;);</span>
+
+<span class="nc" id="L65">        logInBox = new VBox(20);</span>
+
+<span class="nc" id="L67">        borderPaneNotLoggedIn.setLeft(logInBox);</span>
+<span class="nc" id="L68">        BorderPane.setMargin(logInBox, new Insets(0, 0, 0, 450));</span>
+<span class="nc" id="L69">        logInBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L71">        setUpLogin();</span>
+
+<span class="nc" id="L73">        registerBox = new VBox(20);</span>
+<span class="nc" id="L74">        registerBox.getStyleClass().add(&quot;vbox&quot;);</span>
+<span class="nc" id="L75">        borderPaneNotLoggedIn.setRight(registerBox);</span>
+<span class="nc" id="L76">        BorderPane.setMargin(registerBox, new Insets(40, 350, 0, 0));</span>
+<span class="nc" id="L77">        registerBox.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L79">        setUpRegister();</span>
+<span class="nc" id="L80">    }</span>
+
+
+    /***
+     * Sets up login form view
+     */
+    public void setUpLogin(){
+
+<span class="nc" id="L88">        Label loginTitle = new Label(&quot;Login&quot;);</span>
+<span class="nc" id="L89">        loginTitle.setId(&quot;title&quot;);</span>
+<span class="nc" id="L90">        logInBox.getChildren().add(loginTitle);</span>
+
+<span class="nc" id="L92">        Label userNameLBL = new Label(&quot;Username: &quot;);</span>
+<span class="nc" id="L93">        TextField userNameTF = new TextField();</span>
+<span class="nc" id="L94">        logInBox.getChildren().addAll(userNameLBL, userNameTF);</span>
+
+<span class="nc" id="L96">        Label passwordLBL = new Label(&quot;Password: &quot;);</span>
+<span class="nc" id="L97">        PasswordField passwordTF = new PasswordField();</span>
+<span class="nc" id="L98">        logInBox.getChildren().addAll(passwordLBL, passwordTF);</span>
+
+<span class="nc" id="L100">        Region space = new Region();</span>
+<span class="nc" id="L101">        logInBox.getChildren().add(space);</span>
+
+<span class="nc" id="L103">        Button signInBTN = new Button(&quot;Sign in&quot;);</span>
+<span class="nc" id="L104">        logInBox.getChildren().add(signInBTN);</span>
+
+<span class="nc" id="L106">        loginLBL = new Label();</span>
+
+<span class="nc" id="L108">        logInBox.getChildren().add(loginLBL);</span>
+
+<span class="nc" id="L110">        signInBTN.setOnAction((ActionEvent e) -&gt; {</span>
+
+            try {
+<span class="nc" id="L113">                loginPresenter.login(userNameTF.getText(), passwordTF.getText());</span>
+<span class="nc" id="L114">            } catch (IllegalArgumentException m) {</span>
+<span class="nc" id="L115">                displayLoginMSG(m.getMessage());</span>
+<span class="nc" id="L116">                return;</span>
+<span class="nc" id="L117">            }</span>
+
+<span class="nc" id="L119">        });</span>
+
+<span class="nc" id="L121">        passwordTF.setOnAction((ActionEvent e) -&gt; {</span>
+            try {
+<span class="nc" id="L123">                loginPresenter.login(userNameTF.getText(), passwordTF.getText());</span>
+<span class="nc" id="L124">            } catch (IllegalArgumentException m) {</span>
+<span class="nc" id="L125">                displayLoginMSG(m.getMessage());</span>
+<span class="nc" id="L126">                return;</span>
+<span class="nc" id="L127">            }</span>
+<span class="nc" id="L128">        });</span>
+
+
+<span class="nc" id="L131">    }</span>
+
+    /***
+     * Sets up registration form view
+     */
+    public void setUpRegister(){
+<span class="nc" id="L137">        Label registerTitle = new Label(&quot;Register&quot;);</span>
+<span class="nc" id="L138">        registerTitle.setId(&quot;title&quot;);</span>
+<span class="nc" id="L139">        registerBox.getChildren().add(registerTitle);</span>
+
+<span class="nc" id="L141">        Label newUserNameLBL = new Label(&quot;Username: &quot;);</span>
+<span class="nc" id="L142">        TextField newUserNameTF = new TextField();</span>
+<span class="nc" id="L143">        registerBox.getChildren().addAll(newUserNameLBL, newUserNameTF);</span>
+
+<span class="nc" id="L145">        Label newPasswordLBL = new Label(&quot;Password: &quot;);</span>
+<span class="nc" id="L146">        PasswordField newPasswordTF = new PasswordField();</span>
+<span class="nc" id="L147">        registerBox.getChildren().addAll(newPasswordLBL, newPasswordTF);</span>
+
+<span class="nc" id="L149">        Region space = new Region();</span>
+<span class="nc" id="L150">        registerBox.getChildren().add(space);</span>
+
+<span class="nc" id="L152">        Button registerBTN = new Button(&quot;Register&quot;);</span>
+<span class="nc" id="L153">        registerBox.getChildren().add(registerBTN);</span>
+
+<span class="nc" id="L155">        registerTA = new TextArea();</span>
+<span class="nc" id="L156">        registerTA.setEditable(false);</span>
+<span class="nc" id="L157">        registerBox.getChildren().add(registerTA);</span>
+
+<span class="nc" id="L159">        registerBTN.setOnAction((ActionEvent e) -&gt; {</span>
+
+            try {
+<span class="nc" id="L162">                loginPresenter.createUser(newUserNameTF.getText(), newPasswordTF.getText());</span>
+<span class="nc" id="L163">            } catch (IllegalArgumentException m) {</span>
+<span class="nc" id="L164">                displayRegisterMSG(m.getMessage());</span>
+<span class="nc" id="L165">                return;</span>
+<span class="nc" id="L166">            }</span>
+
+<span class="nc" id="L168">        });</span>
+
+<span class="nc" id="L170">        newPasswordTF.setOnAction((ActionEvent e) -&gt; {</span>
+            try {
+<span class="nc" id="L172">                loginPresenter.createUser(newUserNameTF.getText(), newPasswordTF.getText());</span>
+<span class="nc" id="L173">            } catch (IllegalArgumentException m) {</span>
+<span class="nc" id="L174">                displayRegisterMSG(m.getMessage());</span>
+<span class="nc" id="L175">                return;</span>
+<span class="nc" id="L176">            }</span>
+<span class="nc" id="L177">        });</span>
+<span class="nc" id="L178">    }</span>
+
+
+    /***
+     * Displays result of login attempt
+     */
+    public void displayLoginMSG(String msg){
+<span class="nc" id="L185">        loginLBL.setText(msg);</span>
+<span class="nc" id="L186">    }</span>
+
+    /***
+     * Displays result of register attempt
+     */
+    public void displayRegisterMSG(String msg){
+<span class="nc" id="L192">        registerTA.setText(msg);</span>
+<span class="nc" id="L193">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
