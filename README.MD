@@ -1,3 +1,8 @@
+  *Edanam Food Database Ingredient Search
+  
+  - Please run using gradle run --args="online online" to run with an online input API and online output API
+  
+  
   **Input API: Edamam**
 
   **Output API: PasteBin**
@@ -19,29 +24,6 @@
 - Please click on the menu via the three bars OR click through the saved foods page (heart)
 - Please set REDDIT_CLIENT_ID and REDDIT_SECRET as environment variables
 
-**Milestone 1 Submission:**
-    SHA: 66e1f3efff7f39672bef9037b125ac316034912d
-    URI: https://github.sydney.edu.au/kguo5959/SCD2_2022/tree/66e1f3efff7f39672bef9037b125ac316034912d
-
-**Milestone 1 Re-Submission:**
-    SHA: 66e1f3efff7f39672bef9037b125ac316034912d
-    URI: https://github.sydney.edu.au/kguo5959/SCD2_2022/tree/66e1f3efff7f39672bef9037b125ac316034912d
-
-**Milestone 2 Submission:**
-    SHA: c8c079ca5c94e1bf0f1ded9c34bae664907483b8
-    URI: https://github.sydney.edu.au/kguo5959/SCD2_2022/tree/c8c079ca5c94e1bf0f1ded9c34bae664907483b8
-
-**Milestone 2 Re-Submission:**
-    SHA: e3e57130ccdcfb4f7396a187502ea7f4f574e0e6
-    URI: https://github.sydney.edu.au/kguo5959/SCD2_2022/commit/e3e57130ccdcfb4f7396a187502ea7f4f574e0e6
-
-**Exam Base Commit:**
-    SHA: <>
-    URI: <>
-
-**Exam Submission Commit:**
-    SHA: <>
-    URI: <>
 
 **Citations:**
 
