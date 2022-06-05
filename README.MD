@@ -4,16 +4,16 @@ A JavaFX GUI application that allows users to view nutritional data for foods (s
 - Please run using gradle run --args="online online" to run with an online input API and online output API
   
   
-  **Input API: Edamam**
+**Input API: Edamam**
 
-  **Output API: PasteBin**
+**Output API: PasteBin**
 
-  **Claimed Tier: High Distinction**
+**Claimed Tier: High Distinction**
 
-  **Credit Optional Feature 1: Theme Song**
- - use the speaker button to toggle mute
+**Credit Optional Feature 1: Theme Song**
+- use the speaker button to toggle mute
 
-  **Credit Optional Feature 2: Dark/Light Mode**
+**Credit Optional Feature 2: Dark/Light Mode**
 - use the dark/light mode on button
 
 **Distinction Optional Feature: Personalisation and user accounts**
