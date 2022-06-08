@@ -1,5 +1,5 @@
 ## Edanam Food Database Ingredient Search
-A JavaFX GUI application that allows users to view nutritional data for foods (sourced from Edamam’s Food Database API), as well as save that data to an  embedded database, or send it to PasteBin or their Reddit accounts
+A JavaFX GUI application that allows users to view nutritional data for foods (sourced from Edamam’s Food Database API), as well as save that data to an  embedded database, or send it to PasteBin or their Reddit accounts.
   
 - Please run using gradle run --args="online online" to run with an online input API and online output API
   
@@ -8,20 +8,19 @@ A JavaFX GUI application that allows users to view nutritional data for foods (s
 
 **Output API: PasteBin**
 
-**Claimed Tier: High Distinction**
 
-**Credit Optional Feature 1: Theme Song**
+**Feature 1: Theme Song**
 - use the speaker button to toggle mute
 
-**Credit Optional Feature 2: Dark/Light Mode**
+**Feature 2: Dark/Light Mode**
 - use the dark/light mode on button
 
-**Distinction Optional Feature: Personalisation and user accounts**
+**Personalisation and user accounts**
 - Please click on the gear to set colours
 - if light mode or dark mode is clicked, it resets the colours to the default light or dark mode
 - if a different colour is picked by user, that takes precedence over dark/light mode default colours
 
-**High Distinction Optional Feature: Reddit Posting Feature**
+**Reddit Posting Feature**
 - Please click on the menu via the three bars OR click through the saved foods page (heart)
 - Please set REDDIT_CLIENT_ID and REDDIT_SECRET as environment variables
 
